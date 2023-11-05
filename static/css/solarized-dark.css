@@ -1,0 +1,69 @@
+/* Base colors */
+body {
+    background-color: #002b36;
+    color: #93a1a1;
+}
+
+.container {
+    background-color: #073642;
+    border-radius: 5px;
+    padding: 20px;
+}
+
+.jumbotron {
+    background-color: #002b36;
+    color: #93a1a1;
+    border: 1px solid #586e75;
+}
+
+/* Accent colors for buttons */
+.btn-primary {
+    background-color: #268bd2;
+    border-color: #2075a7; 
+}
+
+.btn-danger {
+    background-color: #dc322f;   /* Updating this to represent 'Stop Motors' button */
+    border-color: #c72724; 
+}
+
+.btn-yellow {
+    background-color: #b58900;   /* New class for 'Roll Down' button */
+    border-color: #a07700; 
+    color: black;
+}
+
+.btn-success {
+    background-color: #859900;
+    border-color: #718000; 
+}
+
+/* On hover for buttons */
+.btn-primary:hover, .btn-danger:hover, .btn-yellow:hover, .btn-success:hover {
+    opacity: 0.85;
+}
+
+/* Inputs and Forms */
+input, textarea, select, .form-control {
+    background-color: #002b36;
+    color: #93a1a1;
+    border: 1px solid #586e75;
+}
+
+input:focus, textarea:focus, select:focus, .form-control:focus {
+    border-color: #268bd2;
+    box-shadow: 0 0 0 0.2rem rgba(38, 139, 210, 0.25);
+}
+
+label {
+    color: #93a1a1;
+}
+
+/* Adjust link colors */
+a {
+    color: #268bd2;
+}
+
+a:hover {
+    color: #2075a7;
+}
