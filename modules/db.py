@@ -109,6 +109,5 @@ class Database:
             logger.error(f"Error updating motor status for motor_id={motor_id}: {err}")
             raise
 
-# You may continue with other methods you already have for time settings...
-# Be sure to keep your existing time settings methods here as well.
+# continue with other methods here
 
