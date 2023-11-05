@@ -4,7 +4,7 @@ from datetime import datetime
 import logging
 import traceback
 
-# Import your custom modules
+# Import custom modules
 from modules.db import Database
 from modules import motors as motor_control
 from modules import sensors as sensors
