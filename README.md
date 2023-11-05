@@ -14,7 +14,7 @@ To set up the project, follow these steps:
 
 1. Clone the repository:
    ```bash
-   git clone [repository-url]
+   git clone [https://gitlab.com/dev8292144/greenhouse_automation/]
    ```
 
 2. Install dependencies:

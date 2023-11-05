@@ -22,4 +22,4 @@ def setup_logging():
     if not any(isinstance(handler, logging.StreamHandler) for handler in logger.handlers):
         logger.addHandler(stream_handler)
 
-# Now, you can call this function from your main module
+# you can call this function from your main module
