@@ -1,4 +1,12 @@
 import requests
+import os
+
+channel_id = os.getenv('UBI_CHANNEL_ID')
+account_key = os.getenv('UBI_ACCOUNT_KEY')
+
+def get_ubibot_data(account_key, channel_id):
+    # Function logic here
+    # ...
 
 def fetch_sensor_data(account_key, channel_id):
     """
