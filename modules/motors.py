@@ -1,13 +1,4 @@
-import RPi.GPIO as GPIO
-import platform
-
-# Check if running on Raspberry Pi
-is_raspberry_pi = 'arm' in platform.uname().machine
-
-if is_raspberry_pi:
-    import RPi.GPIO as GPIO
-else:
-    print("Not running on Raspberry Pi. GPIO functionality will be unavailable.")
+from periphery import GPIO
 
 # Motor GPIO Pins - replace with your actual pin numbers
 MOTOR_PINS = {
@@ -17,28 +8,23 @@ MOTOR_PINS = {
     'motor_4': {'up': 5, 'down': 6}
 }
 
-def setup():
-    GPIO.setmode(GPIO.BCM)
-    for motor in MOTOR_PINS.values():
-        GPIO.setup(motor['up'], GPIO.OUT)
-        GPIO.setup(motor['down'], GPIO.OUT)
-
 def roll(direction, motor_id):
     if motor_id not in MOTOR_PINS:
         print(f"Invalid motor ID: {motor_id}")
         return
 
     motor = MOTOR_PINS[motor_id]
-    if direction == 'up':
-        GPIO.output(motor['up'], GPIO.HIGH)
-        GPIO.output(motor['down'], GPIO.LOW)
-    elif direction == 'down':
-        GPIO.output(motor['up'], GPIO.LOW)
-        GPIO.output(motor['down'], GPIO.HIGH)
-    else:
-        print(f"Invalid direction: {direction}")
+    with GPIO(motor['up'], "out") as gpio_up, GPIO(motor['down'], "out") as gpio_down:
+        if direction == 'up':
+            gpio_up.write(True)
+            gpio_down.write(False)
+        elif direction == 'down':
+            gpio_up.write(False)
+            gpio_down.write(True)
+        else:
+            print(f"Invalid direction: {direction}")
 
-    print(f"Motor {motor_id} is rolling {direction}...")
+        print(f"Motor {motor_id} is rolling {direction}...")
 
 def stop(motor_id):
     if motor_id not in MOTOR_PINS:
@@ -46,9 +32,8 @@ def stop(motor_id):
         return
 
     motor = MOTOR_PINS[motor_id]
-    GPIO.output(motor['up'], GPIO.LOW)
-    GPIO.output(motor['down'], GPIO.LOW)
-    print(f"Motor {motor_id} has been stopped...")
+    with GPIO(motor['up'], "out") as gpio_up, GPIO(motor['down'], "out") as gpio_down:
+        gpio_up.write(False)
+        gpio_down.write(False)
 
-# Ensure to call setup() at the appropriate place the application.
-
+        print(f"Motor {motor_id} has been stopped...")

@@ -1,7 +1,5 @@
 import requests
 
-from periphery import GPIO
-
 def fetch_sensor_data(account_key, channel_id):
     """
     Fetches the latest sensor data (temperature and humidity) from UbiBot.
