@@ -134,10 +134,18 @@ def motor_action(action):
     try:
         data = request.get_json()
         motor_id = data.get('motor_id')
-        motor_control.perform_action(action, motor_id)
-        return jsonify({'status': 'success', 'action': action, 'motor_id': motor_id}), 200
+        
+        if motor_id == 'all':
+            # Perform the action on all motors
+            # You need to define how to perform actions on all motors within your motor_control module
+            motor_control.perform_action_all(action)
+        else:
+            # Perform the action on a specific motor ID
+            motor_control.perform_action(action, motor_id)
+            
+        return jsonify({'status': 'success', 'action': action, 'message': f"{action} performed successfully"}), 200
     except Exception as e:
-        logger.error(f"Error in motor action '{action}' for motor {motor_id}: {e}")
+        logger.error(f"Error in motor action '{action}': {e}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
       
 if __name__ == '__main__':

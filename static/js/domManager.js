@@ -12,15 +12,23 @@ export function initTimeUpdater() {
     setInterval(updateCurrentTimeElement, 1000);
 }
 
-export function triggerMotor(action, motorId = 'all') {
+export function triggerMotor(action) {
+    // Broadcast the action to all motors by not specifying a motorId
     fetch(`/motor_action/${action}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ motor_id: motorId })
+        body: JSON.stringify({ motor_id: 'all' }) // Indicates an action for all motors
     })
-
-    .then(response => response.json())
-    .then(data => alert(`${action.replace('_', ' ')}: ${data.message}`))
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Alert with the action performed on all motors
+        alert(`${action.replace('_', ' ')}: ${data.message}`);
+    })
     .catch(error => {
         console.error('Fetch operation error:', error.message);
         alert('An error occurred.');
@@ -31,8 +39,8 @@ function motorControlButtonListener() {
     document.querySelectorAll('.motor-control-btn').forEach(button => {
         button.addEventListener('click', () => {
             const action = button.dataset.action;
-            const motorId = button.dataset.motorId; // Assuming motorId is added to dataset
-            triggerMotor(action, motorId);
+            // Trigger the action for all motors regardless of individual motor IDs
+            triggerMotor(action);
         });
     });
 }
@@ -53,7 +61,7 @@ export function initMotorSwitches() {
         { id: 'overhead-left-switch', statusElem: 'overhead-left-status' },
         { id: 'overhead-right-switch', statusElem: 'overhead-right-status' },
     ];
-    
+
     motorSwitches.forEach(motor => {
         const switchElem = document.getElementById(motor.id);
         switchElem.addEventListener('change', () => {
