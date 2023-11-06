@@ -173,6 +173,18 @@ export function handleSetTimeForm() {
     });
 }
 
+// Function to fetch sensor data from the Flask backend
+export function fetchSensorData() {
+    fetch('/get_sensor_data')
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('temperature').textContent = data.temperature || "Not available";
+        document.getElementById('humidity').textContent = data.humidity || "Not available";
+        document.getElementById('vpd').textContent = data.vpd || "Not available";
+    })
+    .catch(error => console.error('Error fetching sensor data:', error));
+}
+
 // Initialize everything when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', function() {
     initTimeUpdater();
@@ -180,4 +192,5 @@ document.addEventListener('DOMContentLoaded', function() {
     initMotorSwitches();
     motorControlButtonListener();
     handleSetTimeForm();
+    fetchSensorData();
 });
