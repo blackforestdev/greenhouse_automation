@@ -134,4 +134,20 @@ export function fetchSensorData() {
     fetch('/get_sensor_data')
     .then(response => response.json())
     .then(data => updateSensorDataUI(data))
-    .catch(error => console.error('Error
+    .catch(error => console.error('Error fetching sensor data:', error));
+}
+
+function updateSensorDataUI(data) {
+    document.getElementById('temperature').textContent = data.temperature || "Not available";
+    document.getElementById('humidity').textContent = data.humidity || "Not available";
+    document.getElementById('vpd').textContent = data.vpd || "Not available";
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initTimeUpdater();
+    requestTimes();
+    initMotorSwitches();
+    motorControlButtonListener();
+    handleSetTimeForm();
+    fetchSensorData();
+});
