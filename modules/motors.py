@@ -24,7 +24,7 @@ def perform_action(action, motor_id):
         roll_up(motor_id)
     elif action == 'roll_down':
         roll_down(motor_id)
-    elif action == 'stop':
+    elif action == 'stop' or action == 'stop_motors':
         stop(motor_id)
     else:
         print(f"Invalid action: {action}")
