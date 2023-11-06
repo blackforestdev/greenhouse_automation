@@ -8,21 +8,25 @@ logger = logging.getLogger('my_application.db')
 
 class Database:
     def __init__(self):
+        """Initialize database connection."""
         try:
             self.connection = mysql.connector.connect(**DB_CONFIG)
-            self.cursor = self.connection.cursor(dictionary=True)  # Use dictionary cursor to return results as dictionaries
+            self.cursor = self.connection.cursor(dictionary=True)
             logger.info("Database connection established.")
         except mysql.connector.Error as err:
             logger.error(f"Error connecting to the database: {err}")
             raise
 
     def __enter__(self):
+        """Support context manager entry."""
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """Close database resources on context manager exit."""
         self.close()
 
     def close(self):
+        """Close database connection and cursor."""
         try:
             if self.cursor:
                 self.cursor.close()
@@ -34,7 +38,7 @@ class Database:
             logger.error(f"Error closing database resources: {err}")
 
     def save_time_settings(self, roll_up_time, roll_down_time):
-        """Save the roll up and roll down times."""
+        """Save the roll up and roll down times to the database."""
         try:
             query = "INSERT INTO time_settings (roll_up_time, roll_down_time) VALUES (%s, %s)"
             values = (roll_up_time, roll_down_time)
@@ -49,53 +53,31 @@ class Database:
         try:
             query = "SELECT roll_up_time, roll_down_time FROM time_settings ORDER BY id DESC LIMIT 1"
             self.cursor.execute(query)
-            result = self.cursor.fetchone()
-            if result:
-                logger.info("Latest time settings retrieved successfully.")
-            return result
+            return self.cursor.fetchone()
         except mysql.connector.Error as err:
             logger.error(f"Error retrieving latest time settings: {err}")
             return None
-        
-    def get_roll_up_time(self):
+
+    def get_time_setting(self, setting_name):
+        """Retrieve a specific time setting (roll_up_time or roll_down_time)."""
         try:
-            sql = "SELECT roll_up_time FROM time_settings ORDER BY id DESC LIMIT 1"
+            sql = f"SELECT {setting_name} FROM time_settings ORDER BY id DESC LIMIT 1"
             self.cursor.execute(sql)
             result = self.cursor.fetchone()
-            if result:
-                logger.info("Roll up time retrieved successfully.")
-            return result[0] if result else None
+            return result[setting_name] if result else None
         except mysql.connector.Error as err:
-            logger.error(f"Error retrieving roll up time: {err}")
+            logger.error(f"Error retrieving {setting_name}: {err}")
             return None
 
-    def get_roll_down_time(self):
-        try:
-            sql = "SELECT roll_down_time FROM time_settings ORDER BY id DESC LIMIT 1"
-            self.cursor.execute(sql)
-            result = self.cursor.fetchone()
-            if result:
-                logger.info("Roll down time retrieved successfully.")
-            return result[0] if result else None
-        except mysql.connector.Error as err:
-            logger.error(f"Error retrieving roll down time: {err}")
-            return None
-
-    # Motor status related methods
     def get_motor_statuses(self):
         """Retrieve the statuses of all motors."""
         try:
             query = "SELECT motor_id, status FROM motor_statuses"
             self.cursor.execute(query)
-            motor_statuses = self.cursor.fetchall()
-            if motor_statuses:
-                logger.info("Motor statuses retrieved successfully: %s", motor_statuses)
-            else:
-                logger.info("Motor statuses query returned no results.")
-            return motor_statuses
+            return self.cursor.fetchall()
         except mysql.connector.Error as err:
             logger.error(f"Error retrieving motor statuses: {err}")
-            raise
+            return []
 
     def update_motor_status(self, motor_id, status):
         """Update the status of a motor."""
@@ -107,7 +89,5 @@ class Database:
             logger.info(f"Motor status for motor_id={motor_id} updated successfully to {status}.")
         except mysql.connector.Error as err:
             logger.error(f"Error updating motor status for motor_id={motor_id}: {err}")
-            raise
 
-# continue with other methods here
-
+# Additional methods here.
