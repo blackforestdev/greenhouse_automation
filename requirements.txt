@@ -60,6 +60,7 @@ python-socketio==5.10.0
 pytz==2022.1
 PyYAML==5.4.1
 requests==2.25.1
+RPi.GPIO==0.7.1
 SecretStorage==3.3.1
 service-identity==18.1.0
 simple-websocket==1.0.0
