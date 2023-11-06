@@ -14,7 +14,10 @@ def roll(direction, motor_id):
         return
 
     motor = MOTOR_PINS[motor_id]
-    with GPIO(motor['up'], "out") as gpio_up, GPIO(motor['down'], "out") as gpio_down:
+    operate_motor(motor, direction)
+
+def operate_motor(motor_pins, direction):
+    with GPIO(motor_pins['up'], "out") as gpio_up, GPIO(motor_pins['down'], "out") as gpio_down:
         if direction == 'up':
             gpio_up.write(True)
             gpio_down.write(False)
@@ -24,7 +27,13 @@ def roll(direction, motor_id):
         else:
             print(f"Invalid direction: {direction}")
 
-        print(f"Motor {motor_id} is rolling {direction}...")
+        print(f"Motor is rolling {direction}...")
+
+def roll_up(motor_id):
+    roll('up', motor_id)
+
+def roll_down(motor_id):
+    roll('down', motor_id)
 
 def stop(motor_id):
     if motor_id not in MOTOR_PINS:
@@ -32,8 +41,13 @@ def stop(motor_id):
         return
 
     motor = MOTOR_PINS[motor_id]
-    with GPIO(motor['up'], "out") as gpio_up, GPIO(motor['down'], "out") as gpio_down:
-        gpio_up.write(False)
-        gpio_down.write(False)
+    operate_motor(motor, 'stop')
 
-        print(f"Motor {motor_id} has been stopped...")
+def operate_motor(motor_pins, command):
+    with GPIO(motor_pins['up'], "out") as gpio_up, GPIO(motor_pins['down'], "out") as gpio_down:
+        if command == 'stop':
+            gpio_up.write(False)
+            gpio_down.write(False)
+            print(f"Motor {motor_id} has been stopped...")
+        else:
+            print("Invalid command.")
