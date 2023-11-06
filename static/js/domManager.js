@@ -13,11 +13,18 @@ export function initTimeUpdater() {
 }
 
 export function triggerMotor(action) {
-    // Broadcast the action to all motors by not specifying a motorId
+    // Create an object to store the status of each motor switch
+    let motorStatuses = {
+        'motor_1': document.getElementById('sidewall-left-switch').checked,
+        'motor_2': document.getElementById('sidewall-right-switch').checked,
+        'motor_3': document.getElementById('overhead-left-switch').checked,
+        'motor_4': document.getElementById('overhead-right-switch').checked
+    };
+
     fetch(`/motor_action/${action}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ motor_id: 'all' }) // Indicates an action for all motors
+        body: JSON.stringify({ motor_statuses: motorStatuses })
     })
     .then(response => {
         if (!response.ok) {
@@ -26,7 +33,7 @@ export function triggerMotor(action) {
         return response.json();
     })
     .then(data => {
-        // Alert with the action performed on all motors
+        // Alert with the action performed
         alert(`${action.replace('_', ' ')}: ${data.message}`);
     })
     .catch(error => {
@@ -34,6 +41,7 @@ export function triggerMotor(action) {
         alert('An error occurred.');
     });
 }
+
 
 function motorControlButtonListener() {
     document.querySelectorAll('.motor-control-btn').forEach(button => {
