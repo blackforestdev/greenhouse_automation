@@ -55,6 +55,7 @@ pyserial==3.5
 python-apt==2.4.0+ubuntu2
 python-debian==0.1.43+ubuntu1.1
 python-engineio==4.8.0
+python-dotenv==1.0.0
 python-magic==0.4.24
 python-periphery==2.4.1
 python-socketio==5.10.0

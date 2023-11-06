@@ -3,6 +3,7 @@ from flask_socketio import SocketIO
 from datetime import datetime
 import logging
 import traceback
+from dotenv import load_dotenv
 
 # Import custom modules
 from modules.db import Database
@@ -11,6 +12,9 @@ from modules import sensors as sensors
 from app_logging.logging_module import setup_logging
 from app_logging.error_handlers import handle_404
 from modules.sensors import get_ubibot_data
+
+# Load the .env file
+load_dotenv()
 
 # Set up logging configuration
 setup_logging()
