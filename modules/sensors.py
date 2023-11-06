@@ -1,5 +1,5 @@
-import requests
 import os
+import requests
 
 channel_id = os.getenv('UBI_CHANNEL_ID')
 account_key = os.getenv('UBI_ACCOUNT_KEY')
@@ -7,11 +7,35 @@ account_key = os.getenv('UBI_ACCOUNT_KEY')
 def get_ubibot_data():
     channel_id = os.getenv('UBI_CHANNEL_ID')
     account_key = os.getenv('UBI_ACCOUNT_KEY')
+    
+    # URL for UbiBot API (replace with actual API endpoint)
+    url = f"https://api.ubibot.io/channels/{channel_id}/feeds.json"
 
-    # Add the logic to fetch data from UbiBot API
-    # ...
+    # Parameters for the API call
+    params = {
+        'api_key': account_key,
+        # Add other necessary parameters according to the API documentation
+    }
 
-    return data
+    try:
+        # Make the request to the UbiBot API
+        response = requests.get(url, params=params)
+
+        # Check if the request was successful
+        response.raise_for_status()
+
+        # Parse the JSON response
+        data = response.json()
+
+        # Process and return the data as needed
+        return data
+
+    except requests.RequestException as e:
+        # Handle any errors that occur during the request
+        print(f"Error fetching data from UbiBot API: {e}")
+        return None
+
+# Additional processing and error handling can be added as needed
 
 def fetch_sensor_data(account_key, channel_id):
     """
