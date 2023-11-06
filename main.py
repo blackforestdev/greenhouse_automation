@@ -8,10 +8,9 @@ from dotenv import load_dotenv
 # Import custom modules
 from modules.db import Database
 from modules import motors as motor_control
-from modules import sensors as sensors
+from modules.sensors import get_ubibot_data
 from app_logging.logging_module import setup_logging
 from app_logging.error_handlers import handle_404
-from modules.sensors import get_ubibot_data
 
 # Load the .env file
 load_dotenv()
@@ -129,26 +128,30 @@ def handle_motor_action(data):
         logger.error(f"Error triggering motor action '{action}' at {timestamp}: {e}")
         socketio.emit('motor_action_error', {'status': 'error', 'action': action, 'message': str(e), 'timestamp': timestamp})
 
-# Additional routes for motor actions
-@app.route('/motor_action/roll_up', methods=['POST'])
-def motor_roll_up():
+# Route for handling motor actions
+@app.route('/motor_action/<action>', methods=['POST'])
+def motor_action(action):
     try:
-        # Logic for rolling up
-        motor_control.roll_up()  # You need to define this in your motor_control module
-        return jsonify({'status': 'success', 'action': 'roll_up'}), 200
-    except Exception as e:
-        logger.error(f"Error in roll_up action: {e}")
-        return jsonify({'status': 'error', 'message': str(e)}), 500
+        # Assuming motor_id is provided in the request body
+        data = request.get_json()
+        motor_id = data.get('motor_id')
 
-@app.route('/motor_action/roll_down', methods=['POST'])
-def motor_roll_down():
-    try:
-        # Logic for rolling down
-        motor_control.roll_down()  # Define this in your motor_control module
-        return jsonify({'status': 'success', 'action': 'roll_down'}), 200
+        # Call appropriate motor control function based on action
+        if action == 'roll_up':
+            motor_control.roll_up(motor_id)
+        elif action == 'roll_down':
+            motor_control.roll_down(motor_id)
+        elif action == 'stop':
+            motor_control.stop(motor_id)
+        else:
+            raise ValueError(f"Invalid action: {action}")
+
+        logger.info(f"Motor action '{action}' triggered for motor {motor_id}")
+        return jsonify({'status': 'success', 'action': action, 'motor_id': motor_id}), 200
     except Exception as e:
-        logger.error(f"Error in roll_down action: {e}")
-        return jsonify({'status': 'error', 'message': str(e)}), 500
+        logger.error(f"Error in motor action '{action}' for motor {motor_id}: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500        
+      
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000)
