@@ -132,26 +132,20 @@ def handle_motor_action(data):
 @app.route('/motor_action/<action>', methods=['POST'])
 def motor_action(action):
     try:
-        # Assuming motor_id is provided in the request body
         data = request.get_json()
-        motor_id = data.get('motor_id')
+        motor_id = data.get('motor_id', 'all')  # Default to 'all' if no specific motor_id is provided
 
-        # Call appropriate motor control function based on action
-        if action == 'roll_up':
-            motor_control.roll_up(motor_id)
-        elif action == 'roll_down':
-            motor_control.roll_down(motor_id)
-        elif action == 'stop':
-            motor_control.stop(motor_id)
+        if motor_id == 'all':
+            for id in range(1, 5):  # Assuming you have 4 motors
+                motor_control.perform_action(action, id)
         else:
-            raise ValueError(f"Invalid action: {action}")
+            motor_control.perform_action(action, motor_id)
 
         logger.info(f"Motor action '{action}' triggered for motor {motor_id}")
         return jsonify({'status': 'success', 'action': action, 'motor_id': motor_id}), 200
     except Exception as e:
         logger.error(f"Error in motor action '{action}' for motor {motor_id}: {e}")
-        return jsonify({'status': 'error', 'message': str(e)}), 500        
+        return jsonify({'status': 'error', 'message': str(e)}), 500
       
-
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000)

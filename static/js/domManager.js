@@ -12,12 +12,13 @@ export function initTimeUpdater() {
     setInterval(updateCurrentTimeElement, 1000);
 }
 
-export function triggerMotor(action, motorId) {
+export function triggerMotor(action, motorId = 'all') {
     fetch(`/motor_action/${action}`, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ motor_id: motorId })
     })
+    
     .then(response => response.json())
     .then(data => alert(`${action.replace('_', ' ')}: ${data.message}`))
     .catch(error => {
