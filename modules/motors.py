@@ -1,4 +1,13 @@
 import RPi.GPIO as GPIO
+import platform
+
+# Check if running on Raspberry Pi
+is_raspberry_pi = 'arm' in platform.uname().machine
+
+if is_raspberry_pi:
+    import RPi.GPIO as GPIO
+else:
+    print("Not running on Raspberry Pi. GPIO functionality will be unavailable.")
 
 # Motor GPIO Pins - replace with your actual pin numbers
 MOTOR_PINS = {
