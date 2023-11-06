@@ -8,6 +8,16 @@ MOTOR_PINS = {
     'motor_4': {'up': 5, 'down': 6}
 }
 
+def perform_action(action, motor_id):
+    if action == 'roll_up':
+        roll('up', motor_id)
+    elif action == 'roll_down':
+        roll('down', motor_id)
+    elif action == 'stop':
+        stop(motor_id)
+    else:
+        raise ValueError(f"Invalid action: {action}")
+
 def roll(direction, motor_id):
     if motor_id not in MOTOR_PINS:
         print(f"Invalid motor ID: {motor_id}")

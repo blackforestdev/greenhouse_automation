@@ -133,15 +133,8 @@ def handle_motor_action(data):
 def motor_action(action):
     try:
         data = request.get_json()
-        motor_id = data.get('motor_id', 'all')  # Default to 'all' if no specific motor_id is provided
-
-        if motor_id == 'all':
-            for id in range(1, 5):  # Assuming you have 4 motors
-                motor_control.perform_action(action, id)
-        else:
-            motor_control.perform_action(action, motor_id)
-
-        logger.info(f"Motor action '{action}' triggered for motor {motor_id}")
+        motor_id = data.get('motor_id')
+        motor_control.perform_action(action, motor_id)
         return jsonify({'status': 'success', 'action': action, 'motor_id': motor_id}), 200
     except Exception as e:
         logger.error(f"Error in motor action '{action}' for motor {motor_id}: {e}")
