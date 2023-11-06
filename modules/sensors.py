@@ -5,33 +5,16 @@ channel_id = os.getenv('UBI_CHANNEL_ID')
 account_key = os.getenv('UBI_ACCOUNT_KEY')
 
 def get_ubibot_data():
-    channel_id = os.getenv('UBI_CHANNEL_ID')
     account_key = os.getenv('UBI_ACCOUNT_KEY')
-    
-    # URL for UbiBot API (replace with actual API endpoint)
-    url = f"https://api.ubibot.io/channels/{channel_id}/feeds.json"
 
-    # Parameters for the API call
-    params = {
-        'api_key': account_key,
-        # Add other necessary parameters according to the API documentation
-    }
+    url = f"https://webapi.ubibot.com/channels?account_key={account_key}"
 
     try:
-        # Make the request to the UbiBot API
-        response = requests.get(url, params=params)
-
-        # Check if the request was successful
+        response = requests.get(url)
         response.raise_for_status()
-
-        # Parse the JSON response
         data = response.json()
-
-        # Process and return the data as needed
         return data
-
     except requests.RequestException as e:
-        # Handle any errors that occur during the request
         print(f"Error fetching data from UbiBot API: {e}")
         return None
 
