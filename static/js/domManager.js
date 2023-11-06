@@ -18,7 +18,7 @@ export function triggerMotor(action, motorId = 'all') {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ motor_id: motorId })
     })
-    
+
     .then(response => response.json())
     .then(data => alert(`${action.replace('_', ' ')}: ${data.message}`))
     .catch(error => {
@@ -53,7 +53,7 @@ export function initMotorSwitches() {
         { id: 'overhead-left-switch', statusElem: 'overhead-left-status' },
         { id: 'overhead-right-switch', statusElem: 'overhead-right-status' },
     ];
-
+    
     motorSwitches.forEach(motor => {
         const switchElem = document.getElementById(motor.id);
         switchElem.addEventListener('change', () => {
