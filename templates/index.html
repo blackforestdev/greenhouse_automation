@@ -12,13 +12,15 @@
             initTimeUpdater,
             initMotorSwitches,
             fetchMotorStatuses,
-            handleSetTimeForm
+            handleSetTimeForm,
+            fetchSensorData
         } from './static/js/domManager.js';
 
         window.onload = function() {
             initTimeUpdater();
             initMotorSwitches();
             handleSetTimeForm();
+            fetchSensorData();
             setInterval(fetchMotorStatuses, 5000); // Fetch motor statuses every 5 seconds
         };
     </script>
@@ -35,51 +37,32 @@
         <p><strong>Current Time:</strong> <span id="current-time">Loading...</span></p>
         <p><strong>Roll Up Time:</strong> <span id="roll-up-time">Loading...</span></p>
         <p><strong>Roll Down Time:</strong> <span id="roll-down-time">Loading...</span></p>
-        <!--Enviromental Sensor Data --> 
         <p><strong>Temperature:</strong> <span id="temperature">Loading...</span></p>
         <p><strong>Humidity:</strong> <span id="humidity">Loading...</span></p>
         <p><strong>VPD:</strong> <span id="vpd">Loading...</span></p>
-        <!--Motor On/Off status -->
-        <p><strong>Sidewall Left:</strong> <span id="sidewall-left-status">Active</span></p>
-        <p><strong>Sidewall Right:</strong> <span id="sidewall-right-status">Active</span></p>
-        <p><strong>Overhead Left:</strong> <span id="overhead-left-status">Active</span></p>
-        <p><strong>Overhead Right:</strong> <span id="overhead-right-status">Active</span></p>
-        <!-- Add more sensors here as needed -->
+        <!-- Add more environmental sensor data here as needed -->
     </div>
 
     <!-- Manual Controls -->
     <div class="mb-5">
         <h2>Manual Controls</h2>
         <!-- Manual override Motor Control buttons -->
-        <button class="btn btn-primary motor-control-btn" data-action="roll_up">Roll Up</button>
-        <button class="btn btn-yellow motor-control-btn" data-action="roll_down">Roll Down</button>
-        <button class="btn btn-danger motor-control-btn" data-action="stop_motors">Stop Motors</button>
+        <button class="btn btn-primary motor-control-btn" data-action="roll_up" data-motor-id="1">Roll Up Motor 1</button>
+        <button class="btn btn-primary motor-control-btn" data-action="roll_down" data-motor-id="1">Roll Down Motor 1</button>
+        <!-- Add buttons for other motors as needed -->
+        <button class="btn btn-danger motor-control-btn" data-action="stop_motors">Stop All Motors</button>
 
-        <!-- Manual Motor control switches activate/deactivate hardware -->
         <h4>Motor Control On/Off</h4>
         <div class="custom-control custom-switch">
-            <input type="checkbox" class="custom-control-input" id="sidewall-left-switch" checked>
+            <input type="checkbox" class="custom-control-input" id="sidewall-left-switch">
             <label class="custom-control-label" for="sidewall-left-switch">Sidewall Left</label>
         </div>
-        <div class="custom-control custom-switch">
-            <input type="checkbox" class="custom-control-input" id="sidewall-right-switch" checked>
-            <label class="custom-control-label" for="sidewall-right-switch">Sidewall Right</label>
-        </div>
-        <div class="custom-control custom-switch">
-            <input type="checkbox" class="custom-control-input" id="overhead-left-switch" checked>
-            <label class="custom-control-label" for="overhead-left-switch">Overhead Left</label>
-        </div>
-        <div class="custom-control custom-switch">
-            <input type="checkbox" class="custom-control-input" id="overhead-right-switch" checked>
-            <label class="custom-control-label" for="overhead-right-switch">Overhead Right</label>
-        </div>
+        <!-- Add switches for other motors as needed -->
     </div>
-
 
     <!-- Time Settings -->
     <div>
         <h2>Set Time for Motor Actions</h2>
-        <!-- Update form to be handled by JavaScript -->
         <form id="set-time-form">
             <div class="form-group">
                 <label for="roll_up_time">Roll Up Time:</label>
@@ -96,6 +79,6 @@
 
 <!-- WebSocket for UI control locally hosted in static/js/socket.io.js -->
 <script src="{{ url_for('static', filename='js/socket.io.js') }}"></script>
-  
+
 </body>
 </html>
