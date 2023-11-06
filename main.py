@@ -10,6 +10,7 @@ from modules import motors as motor_control
 from modules import sensors as sensors
 from app_logging.logging_module import setup_logging
 from app_logging.error_handlers import handle_404
+from modules.sensors import get_ubibot_data
 
 # Set up logging configuration
 setup_logging()
@@ -72,6 +73,25 @@ def update_motor_status(motor_id):
     except Exception as e:
         logger.error(f"Failed to update motor status for {motor_id}: {e}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/get_sensor_data')
+def sensor_data():
+    try:
+        sensor_data = get_ubibot_data()  # This function fetches data from UbiBot API
+        return jsonify(sensor_data)
+    except Exception as e:
+        app.logger.error("Failed to fetch sensor data: %s", e)
+        return jsonify({'status': 'error', 'message': str(e)}), 500        
+
+# WebSocket event for real-time sensor data (Optional)
+@socketio.on('request_sensor_data')
+def handle_request_sensor_data():
+    try:
+        sensor_data = get_ubibot_data()
+        socketio.emit('sensor_data_response', sensor_data)
+    except Exception as e:
+        app.logger.error("WebSocket: Failed to fetch sensor data: %s", e)
+        socketio.emit('sensor_data_error', {'status': 'error', 'message': str(e)})
 
 @socketio.on('connect')
 def test_connect():
