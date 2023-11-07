@@ -90,4 +90,26 @@ class Database:
         except mysql.connector.Error as err:
             logger.error(f"Error updating motor status for motor_id={motor_id}: {err}")
 
+    def save_api_token(self, token, expiry_time):
+        """Save the API token and its expiry time."""
+        try:
+            query = "REPLACE INTO api_tokens (token, expiry_time) VALUES (%s, %s)"
+            values = (token, expiry_time)
+            self.cursor.execute(query, values)
+            self.connection.commit()
+            logger.info("API token saved successfully.")
+        except mysql.connector.Error as err:
+            logger.error(f"Error saving API token: {err}")
+
+    def get_api_token(self):
+        """Retrieve the API token and its expiry time."""
+        try:
+            query = "SELECT token, expiry_time FROM api_tokens LIMIT 1"
+            self.cursor.execute(query)
+            result = self.cursor.fetchone()
+            return result if result else (None, None)
+        except mysql.connector.Error as err:
+            logger.error(f"Error retrieving API token: {err}")
+            return None, None
+
 # Additional methods here.
