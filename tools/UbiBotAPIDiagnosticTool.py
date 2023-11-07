@@ -17,12 +17,11 @@ print("Channel ID:", ubi_channel_id)
 print("Account Key:", ubi_account_key)
 print("API Key:", ubi_api_key)
 
-# API Request Function
+#API request function 
 def make_ubibot_api_request():
     url = "https://webapi.ubibot.com/channels/{}/feeds.json".format(ubi_channel_id)
     headers = {
-        "account_key": ubi_account_key,
-        "api_key": ubi_api_key
+        "Authorization": "Bearer {}".format(ubi_api_key)
     }
     
     try:
@@ -36,7 +35,7 @@ def make_ubibot_api_request():
     except requests.exceptions.Timeout as errt:
         print("Timeout Error:", errt)
     except requests.exceptions.RequestException as err:
-        print("OOps: Something Else", err)
+        print("Oops: Something Else", err)
 
 # Main Function
 def main():
