@@ -19,7 +19,7 @@ def get_ubibot_data():
         return None
 
 # Additional processing and error handling can be added as needed
-
+"""
 def fetch_sensor_data(account_key, channel_id):
     """
     Fetches the latest sensor data (temperature and humidity) from UbiBot.
@@ -37,6 +37,34 @@ def fetch_sensor_data(account_key, channel_id):
             }
     else:
         raise Exception(f"Failed to fetch data: {response.status_code}")
+"""
+def fetch_sensor_data():
+    """
+    Fetches the latest sensor data (temperature and humidity) from UbiBot.
+    """
+    account_key = os.getenv('UBI_ACCOUNT_KEY')
+    channel_id = os.getenv('UBI_CHANNEL_ID')
+
+    url = f'https://webapi.ubibot.com/channels/{channel_id}/feeds.json?account_key={account_key}'
+    
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+
+        data = response.json()
+        latest_data = data['feeds'][0] if data['feeds'] else None
+
+        if latest_data:
+            # Replace 'field1' and 'field2' with your actual field keys
+            temperature = latest_data.get('field1')
+            humidity = latest_data.get('field2')
+
+            return {'temperature': temperature, 'humidity': humidity}
+
+    except requests.RequestException as e:
+        # Log the error (consider using a logging framework)
+        print(f"Failed to fetch data: {e}")
+        return None
 
 def calculate_vpd(temperature, humidity):
     """
