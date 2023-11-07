@@ -104,25 +104,18 @@ class Database:
             logger.info("API token saved successfully.")
         except mysql.connector.Error as err:
             logger.error(f"Error saving API token: {err}")
-
+           
     def get_api_token(self):
         """Retrieve the API token and its expiry time."""
         try:
             query = "SELECT token, expiry_time FROM api_tokens LIMIT 1"
             self.cursor.execute(query)
             result = self.cursor.fetchone()
-
             if result:
-                # Convert expiry_time from string to datetime object
                 token, expiry_time_str = result['token'], result['expiry_time']
-                expiry_time = datetime.strptime(expiry_time_str, '%Y-%m-%d %H:%M:%S')
+                expiry_time = datetime.strptime(expiry_time_str, '%Y-%m-%d %H:%M:%S') if expiry_time_str else None
                 return token, expiry_time
-            else:
-                return None, None
-        except mysql.connector.Error as err:
-            logger.error(f"Error retrieving API token: {err}")
             return None, None
-
         except mysql.connector.Error as err:
             logger.error(f"Error retrieving API token: {err}")
             return None, None
