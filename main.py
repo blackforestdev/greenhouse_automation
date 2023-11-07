@@ -97,7 +97,7 @@ def sensor_data():
         data = fetch_sensor_data(token, os.getenv('UBI_CHANNEL_ID'))
         return jsonify(data)
     except Exception as e:
-        app.logger.error("Failed to fetch sensor data: %s", e, , exc_info=True)
+        app.logger.error("Failed to fetch sensor data: %s", e, exc_info=True)
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @socketio.on('request_sensor_data')
@@ -118,7 +118,7 @@ def handle_request_sensor_data():
         data = fetch_sensor_data(token, os.getenv('UBI_CHANNEL_ID'))
         socketio.emit('sensor_data_response', data)
     except Exception as e:
-        app.logger.error("WebSocket: Failed to fetch sensor data: %s", e, , exc_info=True)
+        app.logger.error("WebSocket: Failed to fetch sensor data: %s", e, exc_info=True)
         socketio.emit('sensor_data_error', {'status': 'error', 'message': str(e)})
 
 @socketio.on('connect')
