@@ -1,5 +1,4 @@
 import os
-import requests
 from dotenv import load_dotenv
 
 # Load environment variables from the .env file in the parent directory
@@ -7,33 +6,32 @@ parent_directory = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 dotenv_path = os.path.join(parent_directory, '.env')
 load_dotenv(dotenv_path)
 
-ubi_channel_id = os.getenv("UBI_CHANNEL_ID")
 ubi_account_key = os.getenv("UBI_ACCOUNT_KEY")
-ubi_read_api_key = os.getenv("UBI_READ_API_KEY")
-ubi_write_api_key = os.getenv("UBI_WRITE_API_KEY")
 
-def validate_read_api_key(channel_id, read_api_key):
-    url = f"https://webapi.ubibot.com/channels/{channel_id}/feeds.json"
+import requests
+
+def generate_access_token(account_key, expire_in_seconds=3600):
+    url = f"https://webapi.ubibot.com/accounts/generate_access_token?account_key={account_key}&expire_in_seconds={expire_in_seconds}"
     
-    headers = {"api_key": read_api_key}
     try:
-        response = requests.get(url, headers=headers)
-        
+        response = requests.get(url)  # or requests.post(url) if required
         if response.status_code == 200:
-            print("Read API Key is valid.")
-            return True
+            data = response.json()
+            return data.get("token_id")
         else:
-            print(f"Read API Key validation failed. Status Code: {response.status_code}")
-            return False
+            print(f"Failed to generate access token. Status Code: {response.status_code}")
+            return None
     except Exception as e:
-        print(f"Error during Read API Key validation: {e}")
-        return False
+        print(f"Error during Access Token generation: {e}")
+        return None
 
 def main():
-    if validate_read_api_key(ubi_channel_id, ubi_read_api_key):
-        print("Read API Key validation successful.")
+    token_id = generate_access_token(ubi_account_key)
+    if token_id:
+        print(f"Access Token generated successfully: {token_id}")
+        # You can now use this token_id for further API calls
     else:
-        print("Read API Key validation failed.")
+        print("Failed to generate Access Token.")
 
 if __name__ == "__main__":
     main()
