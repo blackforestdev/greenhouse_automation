@@ -22,8 +22,13 @@ def refresh_api_token():
         response.raise_for_status()
         data = response.json()
         token = data.get("token")
-        expiry = datetime.now() + timedelta(seconds=int(data.get("expire_in_seconds", 3600)))
-        return token, expiry
+        
+        # Convert expiry time to datetime object
+        expiry_seconds = int(data.get("expire_in_seconds", 3600))
+        expiry_time = datetime.now() + timedelta(seconds=expiry_seconds)
+
+        return token, expiry_time
     except requests.RequestException as e:
         print(f"Error generating new API token: {e}")
         return None, None
+
