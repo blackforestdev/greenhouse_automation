@@ -83,12 +83,16 @@ def update_motor_status(motor_id):
 def sensor_data():
     try:
         with Database() as db:
-            token, expiry_time = db.get_api_token()  # Unpack the tuple directly
+            token_data = db.get_api_token()
+            token, expiry_str = token_data
 
-        if not token or datetime.now() >= expiry_time:
-            token, expiry_time = refresh_api_token()  # Implement this function
-            with Database() as db:
-                db.save_api_token(token, expiry_time)
+            # Convert the expiry_time from string to datetime
+            expiry_time = datetime.strptime(expiry_str, '%Y-%m-%d %H:%M:%S') if expiry_str else None
+
+            if not token or datetime.now() >= expiry_time:
+                token, expiry_time = refresh_api_token()
+                with Database() as db:
+                    db.save_api_token(token, expiry_time)
 
         data = fetch_sensor_data(token, os.getenv('UBI_CHANNEL_ID'))
         return jsonify(data)
@@ -100,12 +104,16 @@ def sensor_data():
 def handle_request_sensor_data():
     try:
         with Database() as db:
-            token, expiry_time = db.get_api_token()  # Unpack the tuple directly
+            token_data = db.get_api_token()
+            token, expiry_str = token_data
 
-        if not token or datetime.now() >= expiry_time:
-            token, expiry_time = refresh_api_token()
-            with Database() as db:
-                db.save_api_token(token, expiry_time)
+            # Convert the expiry_time from string to datetime
+            expiry_time = datetime.strptime(expiry_str, '%Y-%m-%d %H:%M:%S') if expiry_str else None
+
+            if not token or datetime.now() >= expiry_time:
+                token, expiry_time = refresh_api_token()
+                with Database() as db:
+                    db.save_api_token(token, expiry_time)
 
         data = fetch_sensor_data(token, os.getenv('UBI_CHANNEL_ID'))
         socketio.emit('sensor_data_response', data)

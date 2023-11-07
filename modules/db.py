@@ -93,8 +93,11 @@ class Database:
     def save_api_token(self, token, expiry_time):
         """Save the API token and its expiry time."""
         try:
+            # Convert expiry_time to string format for database storage
+            expiry_str = expiry_time.strftime('%Y-%m-%d %H:%M:%S') if expiry_time else None
+
             query = "REPLACE INTO api_tokens (token, expiry_time) VALUES (%s, %s)"
-            values = (token, expiry_time)
+            values = (token, expiry_str)
             self.cursor.execute(query, values)
             self.connection.commit()
             logger.info("API token saved successfully.")
@@ -107,7 +110,13 @@ class Database:
             query = "SELECT token, expiry_time FROM api_tokens LIMIT 1"
             self.cursor.execute(query)
             result = self.cursor.fetchone()
+
+            if result and result['expiry_time']:
+                # Convert the expiry_time from string to datetime
+                result['expiry_time'] = datetime.strptime(result['expiry_time'], '%Y-%m-%d %H:%M:%S')
+
             return result if result else (None, None)
+
         except mysql.connector.Error as err:
             logger.error(f"Error retrieving API token: {err}")
             return None, None
