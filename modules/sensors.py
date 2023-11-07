@@ -2,29 +2,13 @@ import os
 import requests
 
 channel_id = os.getenv('UBI_CHANNEL_ID')
-account_key = os.getenv('UBI_API_KEY')
+api_key = os.getenv('UBI_API_KEY')
 
-def get_ubibot_data():
-    account_key = os.getenv('UBI_ACCOUNT_KEY')
-
-    url = f"https://webapi.ubibot.com/channels?account_key={account_key}"
-
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-        data = response.json()
-        return data
-    except requests.RequestException as e:
-        print(f"Error fetching data from UbiBot API: {e}")
-        return None
-
-# Additional processing and error handling can be added as needed
-
-def fetch_sensor_data(account_key, channel_id):
+def fetch_sensor_data(api_key, channel_id):
     """
     Fetches the latest sensor data (temperature and humidity) from UbiBot.
     """
-    url = f'https://api.ubibot.com/channels/{channel_id}/feeds.json?account_key={account_key}'
+    url = f'https://webapi.ubibot.com/channels/{channel_id}/feeds.json?api_key={api_key}'
     response = requests.get(url)
     
     if response.status_code == 200:
@@ -32,12 +16,11 @@ def fetch_sensor_data(account_key, channel_id):
         latest_data = data['feeds'][0] if data['feeds'] else None
         if latest_data:
             return {
-                'temperature': latest_data.get('Temperature'),  # Temperature data
-                'humidity': latest_data.get('Humidity')  # Humidity data
+                'temperature': latest_data.get('Temperature'),
+                'humidity': latest_data.get('Humidity')
             }
     else:
         raise Exception(f"Failed to fetch data: {response.status_code}")
-
 
 def calculate_vpd(temperature, humidity):
     """
@@ -47,12 +30,12 @@ def calculate_vpd(temperature, humidity):
     # VPD calculation logic
     return vpd
 
-def get_sensor_data_and_vpd(account_key, channel_id):
+def get_sensor_data_and_vpd(api_key, channel_id):
     """
     Gets sensor data and calculates VPD.
     """
     try:
-        sensor_data = fetch_sensor_data(account_key, channel_id)
+        sensor_data = fetch_sensor_data(api_key, channel_id)
         vpd = calculate_vpd(sensor_data['temperature'], sensor_data['humidity'])
         return {**sensor_data, 'vpd': vpd}
     except Exception as e:
