@@ -82,7 +82,7 @@ def update_motor_status(motor_id):
 def sensor_data():
     try:
         # Fetch data using fetch_sensor_data function
-        data = fetch_sensor_data(os.getenv('UBI_ACCOUNT_KEY'), os.getenv('UBI_CHANNEL_ID'))
+        data = fetch_sensor_data(os.getenv('UBI_API_KEY'), os.getenv('UBI_CHANNEL_ID'))
         return jsonify(data)
     except Exception as e:
         app.logger.error("Failed to fetch sensor data: %s", e)
@@ -93,7 +93,7 @@ def sensor_data():
 def handle_request_sensor_data():
     try:
         # Fetch data using fetch_sensor_data function
-        data = fetch_sensor_data(os.getenv('UBI_ACCOUNT_KEY'), os.getenv('UBI_CHANNEL_ID'))
+        data = fetch_sensor_data(os.getenv('UBI_API_KEY'), os.getenv('UBI_CHANNEL_ID'))
         socketio.emit('sensor_data_response', data)
     except Exception as e:
         app.logger.error("WebSocket: Failed to fetch sensor data: %s", e)

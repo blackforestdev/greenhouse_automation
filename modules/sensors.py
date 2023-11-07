@@ -2,7 +2,7 @@ import os
 import requests
 
 channel_id = os.getenv('UBI_CHANNEL_ID')
-account_key = os.getenv('UBI_ACCOUNT_KEY')
+account_key = os.getenv('UBI_API_KEY')
 
 def get_ubibot_data():
     account_key = os.getenv('UBI_ACCOUNT_KEY')
