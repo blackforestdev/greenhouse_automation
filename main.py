@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 # Import custom modules
 from modules.db import Database
 from modules import motors as motor_control
-from modules.sensors import get_ubibot_data
+from modules.sensors import fetch_sensor_data
 from app_logging.logging_module import setup_logging
 from app_logging.error_handlers import handle_404
 
@@ -80,8 +80,9 @@ def update_motor_status(motor_id):
 @app.route('/get_sensor_data')
 def sensor_data():
     try:
-        sensor_data = get_ubibot_data()  # This function fetches data from UbiBot API
-        return jsonify(sensor_data)
+        # Fetch data using fetch_sensor_data function
+        data = fetch_sensor_data(os.getenv('UBI_ACCOUNT_KEY'), os.getenv('UBI_CHANNEL_ID'))
+        return jsonify(data)
     except Exception as e:
         app.logger.error("Failed to fetch sensor data: %s", e)
         return jsonify({'status': 'error', 'message': str(e)}), 500        
@@ -90,8 +91,9 @@ def sensor_data():
 @socketio.on('request_sensor_data')
 def handle_request_sensor_data():
     try:
-        sensor_data = get_ubibot_data()
-        socketio.emit('sensor_data_response', sensor_data)
+        # Fetch data using fetch_sensor_data function
+        data = fetch_sensor_data(os.getenv('UBI_ACCOUNT_KEY'), os.getenv('UBI_CHANNEL_ID'))
+        socketio.emit('sensor_data_response', data)
     except Exception as e:
         app.logger.error("WebSocket: Failed to fetch sensor data: %s", e)
         socketio.emit('sensor_data_error', {'status': 'error', 'message': str(e)})
