@@ -12,6 +12,7 @@ from modules import motors as motor_control
 from modules.sensors import fetch_sensor_data
 from app_logging.logging_module import setup_logging
 from app_logging.error_handlers import handle_404
+from modules.api_utils import refresh_api_token
 
 # Load the .env file
 load_dotenv()
