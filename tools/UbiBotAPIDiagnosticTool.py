@@ -15,7 +15,7 @@ ubi_api_key = os.getenv("UBI_API_KEY")
 
 # API Request Function
 def make_ubibot_api_request():
-    url = "https://api.ubibot.io/channels/{}/feeds.json".format(ubi_channel_id)
+    url = "https://webapi.ubibot.com/channels/{}/feeds.json".format(ubi_channel_id)
     headers = {
         "account_key": ubi_account_key,
         "api_key": ubi_api_key
