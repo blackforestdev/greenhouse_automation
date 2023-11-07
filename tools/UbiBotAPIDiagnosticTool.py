@@ -3,8 +3,12 @@ import os
 import logging
 import requests
 
-load_dotenv()
-# load data from .env
+# Navigate to the parent directory
+parent_dir = os.path.dirname(os.getcwd())
+dotenv_path = os.path.join(parent_dir, '.env')
+load_dotenv(dotenv_path)
+
+# Now load the environment variables
 ubi_channel_id = os.getenv("UBI_CHANNEL_ID")
 ubi_account_key = os.getenv("UBI_ACCOUNT_KEY")
 ubi_api_key = os.getenv("UBI_API_KEY")
