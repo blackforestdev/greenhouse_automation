@@ -37,12 +37,8 @@ def fetch_sensor_data():
         latest_data = data['feeds'][0] if data['feeds'] else None
 
         if latest_data:
-            # Replace 'field1' and 'field2' with your actual field keys
-            # Assuming the correct keys are 'temperature' and 'humidity' in the API response
-            temperature = latest_data.get('temperature')
-            humidity = latest_data.get('humidity')
-            data = response.json()
-            print(data)  # Temporarily added for debugging
+            temperature = latest_data.get('Temperature')
+            humidity = latest_data.get('Humidity')
 
 
             return {'temperature': temperature, 'humidity': humidity}
