@@ -83,8 +83,7 @@ def update_motor_status(motor_id):
 def sensor_data():
     try:
         with Database() as db:
-            token_data = db.get_api_token()
-            token, expiry_time = token_data['token'], token_data['expiry_time']
+            token, expiry_time = db.get_api_token()  # Unpack the tuple directly
 
         if not token or datetime.now() >= expiry_time:
             token, expiry_time = refresh_api_token()  # Implement this function
@@ -101,8 +100,7 @@ def sensor_data():
 def handle_request_sensor_data():
     try:
         with Database() as db:
-            token_data = db.get_api_token()
-            token, expiry_time = token_data['token'], token_data['expiry_time']
+            token, expiry_time = db.get_api_token()  # Unpack the tuple directly
 
         if not token or datetime.now() >= expiry_time:
             token, expiry_time = refresh_api_token()
