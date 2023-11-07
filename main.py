@@ -84,6 +84,7 @@ def sensor_data():
     try:
         with Database() as db:
             token, expiry_time = db.get_api_token()
+            print(f"Token type: {type(token)}, Expiry time type: {type(expiry_time)}") #for debugging
 
         if not token or (expiry_time and datetime.now() >= expiry_time):
             token, expiry_time = refresh_api_token()
@@ -101,6 +102,7 @@ def handle_request_sensor_data():
     try:
         with Database() as db:
             token, expiry_time = db.get_api_token()
+            print(f"Token type: {type(token)}, Expiry time type: {type(expiry_time)}") # for debugging
 
         if not token or (expiry_time and datetime.now() >= expiry_time):
             token, expiry_time = refresh_api_token()

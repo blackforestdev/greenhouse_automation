@@ -26,7 +26,7 @@ def refresh_api_token():
         # Convert expiry time to datetime object
         expiry_seconds = int(data.get("expire_in_seconds", 3600))
         expiry_time = datetime.now() + timedelta(seconds=expiry_seconds)
-
+        print(f"Expiry time type: {type(expiry_time)}") # for debugging
         return token, expiry_time
     except requests.RequestException as e:
         print(f"Error generating new API token: {e}")

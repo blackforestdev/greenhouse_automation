@@ -111,6 +111,7 @@ class Database:
             query = "SELECT token, expiry_time FROM api_tokens LIMIT 1"
             self.cursor.execute(query)
             result = self.cursor.fetchone()
+            print(f"Fetched token data types: token={type(result['token'])}, expiry_time={type(result['expiry_time'])}") # for debugging  
             return result if result else (None, None)
         except mysql.connector.Error as err:
             logger.error(f"Error retrieving API token: {err}")
