@@ -163,7 +163,6 @@ function updateSensorDataUI(data) {
 document.addEventListener('DOMContentLoaded', () => {
     initTimeUpdater();
     requestTimes();
-    triggerMotor();
     initMotorSwitches();
     motorControlButtonListener();
     fetchMotorStatuses();
