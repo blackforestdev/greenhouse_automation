@@ -1,53 +1,45 @@
-from dotenv import load_dotenv
 import os
-import logging
 import requests
+from dotenv import load_dotenv
 
-# Navigate to the parent directory
-parent_dir = os.path.dirname(os.getcwd())
-dotenv_path = os.path.join(parent_dir, '.env')
+# Load environment variables from the .env file located in the parent directory
+parent_directory = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+dotenv_path = os.path.join(parent_directory, '.env')
 load_dotenv(dotenv_path)
 
-# Now load the environment variables
 ubi_channel_id = os.getenv("UBI_CHANNEL_ID")
 ubi_account_key = os.getenv("UBI_ACCOUNT_KEY")
 ubi_api_key = os.getenv("UBI_API_KEY")
 
-print("Channel ID:", ubi_channel_id)
-print("Account Key:", ubi_account_key)
-print("API Key:", ubi_api_key)
-
-#API request function 
-def make_ubibot_api_request():
-    url = "https://webapi.ubibot.com/channels/{}/feeds.json".format(ubi_channel_id)
-    headers = {
-        "Authorization": "Bearer {}".format(ubi_api_key)
-    }
+def validate_api_credentials(channel_id, account_key, api_key):
+    if not all([channel_id, account_key, api_key]):
+        print("One or more credentials (Channel ID, Account Key, API Key) are missing.")
+        return False
+    
+    # Test API call
+    url = f"https://webapi.ubibot.com/channels/{channel_id}/feeds.json"
+    headers = {"account_key": account_key, "api_key": api_key}
     
     try:
         response = requests.get(url, headers=headers)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.HTTPError as errh:
-        print("Http Error:", errh)
-    except requests.exceptions.ConnectionError as errc:
-        print("Error Connecting:", errc)
-    except requests.exceptions.Timeout as errt:
-        print("Timeout Error:", errt)
-    except requests.exceptions.RequestException as err:
-        print("Oops: Something Else", err)
+        if response.status_code == 200:
+            return True
+        else:
+            print(f"API credentials validation failed. Status Code: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"Error during API credentials validation: {e}")
+        return False
 
-# Main Function
+def fetch_sensor_data(channel_id, account_key, api_key):
+    # Function to fetch data from UbiBot API
+
 def main():
-    api_response = make_ubibot_api_request()
-    if api_response:
-        # Process the response
-        print(api_response)
+    if validate_api_credentials(ubi_channel_id, ubi_account_key, ubi_api_key):
+        data = fetch_sensor_data(ubi_channel_id, ubi_account_key, ubi_api_key)
+        # Process and print data
     else:
-        print("Failed to get a valid response from the UbiBot API.")
+        print("Invalid API credentials. Please check your .env file.")
 
 if __name__ == "__main__":
     main()
-
-#error logging
-logging.basicConfig(filename='ubibot_api_errors.log', level=logging.DEBUG)
