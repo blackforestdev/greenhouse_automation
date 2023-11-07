@@ -83,16 +83,21 @@ def update_motor_status(motor_id):
 def sensor_data():
     try:
         with Database() as db:
-            token, expiry_time = db.get_api_token()
-            print(f"Token type: {type(token)}, Expiry time type: {type(expiry_time)}") #for debugging
+            token_data = db.get_api_token()
+            token, expiry_time_str = token_data['token'], token_data['expiry_time']
 
-        if not token or (expiry_time and datetime.now() >= expiry_time):
-            token, expiry_time = refresh_api_token()
-            with Database() as db:
-                db.save_api_token(token, expiry_time)
+            if expiry_time_str:
+                expiry_time = datetime.strptime(expiry_time_str, '%Y-%m-%d %H:%M:%S') 
+            else:
+                expiry_time = None
 
-        data = fetch_sensor_data(token, os.getenv('UBI_CHANNEL_ID'))
-        return jsonify(data)
+            if not token or (expiry_time and datetime.now() >= expiry_time):
+                token, expiry_time = refresh_api_token()
+                with Database() as db:
+                    db.save_api_token(token, expiry_time)
+
+            data = fetch_sensor_data(token, os.getenv('UBI_CHANNEL_ID'))
+            return jsonify(data)
     except Exception as e:
         app.logger.error("Failed to fetch sensor data: %s", e)
         return jsonify({'status': 'error', 'message': str(e)}), 500
@@ -115,25 +120,28 @@ def handle_request_sensor_data():
         app.logger.error("WebSocket: Failed to fetch sensor data: %s", e)
         socketio.emit('sensor_data_error', {'status': 'error', 'message': str(e)})
 
-@socketio.on('connect')
-def test_connect():
-    logger.info('Client connected at %s', datetime.now())
-
-@socketio.on('disconnect')
-def test_disconnect():
-    logger.info('Client disconnected at %s', datetime.now())
-
-@socketio.on('request_motor_status')
-def handle_request_motor_status():
+@socketio.on('request_sensor_data')
+def handle_request_sensor_data():
     try:
         with Database() as db:
-            motor_statuses = db.get_motor_statuses()
-        logger.info("Motor statuses fetched successfully")
-        socketio.emit('motor_status_response', motor_statuses)
+            token_data = db.get_api_token()
+            token, expiry_time_str = token_data['token'], token_data['expiry_time']
+
+            if expiry_time_str:
+                expiry_time = datetime.strptime(expiry_time_str, '%Y-%m-%d %H:%M:%S')
+            else:
+                expiry_time = None
+
+            if not token or (expiry_time and datetime.now() >= expiry_time):
+                token, expiry_time = refresh_api_token()
+                with Database() as db:
+                    db.save_api_token(token, expiry_time)
+
+            data = fetch_sensor_data(token, os.getenv('UBI_CHANNEL_ID'))
+            socketio.emit('sensor_data_response', data)
     except Exception as e:
-        error_message = f"Failed to fetch motor statuses: {e}, traceback: {traceback.format_exc()}"
-        logger.error(error_message)
-        socketio.emit('motor_status_error', {'status': 'error', 'message': str(e)})
+        app.logger.error("WebSocket: Failed to fetch sensor data: %s", e)
+        socketio.emit('sensor_data_error', {'status': 'error', 'message': str(e)})
 
 @socketio.on('trigger_motor_action')
 def handle_motor_action(data):

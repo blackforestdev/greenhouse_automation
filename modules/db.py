@@ -93,6 +93,8 @@ class Database:
             logger.error(f"Error updating motor status for motor_id={motor_id}: {err}")
 
     def save_api_token(self, token, expiry_time):
+        if isinstance(expiry_time, datetime):
+            expiry_time = expiry_time.strftime('%Y-%m-%d %H:%M:%S')  # Convert the format for the database
         """Save the API token and its expiry time."""
         try:
             query = "REPLACE INTO api_tokens (token, expiry_time) VALUES (%s, %s)"
