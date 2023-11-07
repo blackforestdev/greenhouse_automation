@@ -84,9 +84,11 @@ def sensor_data():
     try:
         with Database() as db:
             token_data = db.get_api_token()
-            token, expiry_time = token_data['token'], token_data['expiry_time']
+            token, expiry_time_str = token_data['token'], token_data['expiry_time']
 
-        if not token or datetime.now() >= expiry_time:
+            expiry_time = datetime.strptime(expiry_time_str, '%Y-%m-%d %H:%M:%S') if expiry_time_str else None
+
+        if not token or (expiry_time and datetime.now() >= expiry_time):
             token, expiry_time = refresh_api_token()
             with Database() as db:
                 db.save_api_token(token, expiry_time)
@@ -102,9 +104,11 @@ def handle_request_sensor_data():
     try:
         with Database() as db:
             token_data = db.get_api_token()
-            token, expiry_time = token_data['token'], token_data['expiry_time']
+            token, expiry_time_str = token_data['token'], token_data['expiry_time']
 
-        if not token or datetime.now() >= expiry_time:
+            expiry_time = datetime.strptime(expiry_time_str, '%Y-%m-%d %H:%M:%S') if expiry_time_str else None
+
+        if not token or (expiry_time and datetime.now() >= expiry_time):
             token, expiry_time = refresh_api_token()
             with Database() as db:
                 db.save_api_token(token, expiry_time)
