@@ -3,6 +3,8 @@
 import mysql.connector
 import logging
 from config import DB_CONFIG
+from datetime import datetime
+
 
 logger = logging.getLogger('my_application.db')
 
