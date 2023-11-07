@@ -83,11 +83,7 @@ def update_motor_status(motor_id):
 def sensor_data():
     try:
         with Database() as db:
-            token_data = db.get_api_token()
-            token, expiry_time_str = token_data['token'], token_data['expiry_time']
-
-            print("Expiry time string:", expiry_time_str, "Type:", type(expiry_time_str))
-            expiry_time = datetime.strptime(expiry_time_str, '%Y-%m-%d %H:%M:%S') if expiry_time_str else None
+            token, expiry_time = db.get_api_token()
 
         if not token or (expiry_time and datetime.now() >= expiry_time):
             token, expiry_time = refresh_api_token()
@@ -97,18 +93,14 @@ def sensor_data():
         data = fetch_sensor_data(token, os.getenv('UBI_CHANNEL_ID'))
         return jsonify(data)
     except Exception as e:
-        app.logger.error("Failed to fetch sensor data: %s", e, exc_info=True)
+        app.logger.error("Failed to fetch sensor data: %s", e)
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @socketio.on('request_sensor_data')
 def handle_request_sensor_data():
     try:
         with Database() as db:
-            token_data = db.get_api_token()
-            token, expiry_time_str = token_data['token'], token_data['expiry_time']
-
-            print("Expiry time string:", expiry_time_str, "Type:", type(expiry_time_str))
-            expiry_time = datetime.strptime(expiry_time_str, '%Y-%m-%d %H:%M:%S') if expiry_time_str else None
+            token, expiry_time = db.get_api_token()
 
         if not token or (expiry_time and datetime.now() >= expiry_time):
             token, expiry_time = refresh_api_token()
@@ -118,7 +110,7 @@ def handle_request_sensor_data():
         data = fetch_sensor_data(token, os.getenv('UBI_CHANNEL_ID'))
         socketio.emit('sensor_data_response', data)
     except Exception as e:
-        app.logger.error("WebSocket: Failed to fetch sensor data: %s", e, exc_info=True)
+        app.logger.error("WebSocket: Failed to fetch sensor data: %s", e)
         socketio.emit('sensor_data_error', {'status': 'error', 'message': str(e)})
 
 @socketio.on('connect')
