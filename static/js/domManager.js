@@ -47,6 +47,7 @@ function motorControlButtonListener() {
     document.querySelectorAll('.motor-control-btn').forEach(button => {
         button.addEventListener('click', () => {
             const action = button.dataset.action;
+            console.log("Button clicked:", action); //Added for testing
             // Trigger the action for all motors regardless of individual motor IDs
             triggerMotor(action);
         });
