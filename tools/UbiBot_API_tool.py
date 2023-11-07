@@ -1,8 +1,13 @@
 import requests
 import json
+from dotenv import load_dotenv
+import os
 
-def get_ubibot_device_channels(account_key):
-    url = f'https://webapi.ubibot.com/channels?account_key={account_key}'
+# Load environment variables from .env file
+load_dotenv()
+
+def get_ubibot_device_channels(api_key):
+    url = f'https://webapi.ubibot.com/channels?api_key={api_key}'
     response = requests.get(url)
     
     if response.status_code == 200:
@@ -17,5 +22,7 @@ def get_ubibot_device_channels(account_key):
     else:
         print(f"Failed to retrieve channels. Status Code: {response.status_code}, Response: {response.text}")
 
-account_key = 'f23b1d6093b52054e1edadd224d5a116'
-get_ubibot_device_channels(account_key)
+# Retrieve the API key from the .env file
+api_key = os.getenv('UBI_API_KEY')
+
+get_ubibot_device_channels(api_key)
