@@ -106,7 +106,7 @@ class Database:
             logger.error(f"Error saving API token: {err}")
            
     def get_api_token(self):
-    """Retrieve the API token and its expiry time."""
+        """Retrieve the API token and its expiry time."""
         try:
             query = "SELECT token, expiry_time FROM api_tokens LIMIT 1"
             self.cursor.execute(query)
