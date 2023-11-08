@@ -10,14 +10,13 @@ load_dotenv(os.path.join(os.path.dirname(__file__), '../.env'))
 # Get UbiBot account details from .env file
 UBI_ACCOUNT_KEY = os.getenv("UBI_ACCOUNT_KEY")
 UBI_CHANNEL_ID = os.getenv("UBI_CHANNEL_ID")
-UBI_READ_API_KEY = os.getenv("UBI_READ_API_KEY")
 
 def generate_access_token():
     url = "https://webapi.ubibot.com/accounts/generate_access_token"
     params = {"account_key": UBI_ACCOUNT_KEY}
     try:
         response = requests.get(url, params=params)
-        response.raise_for_status()  # Will raise an HTTPError if the HTTP request returned an unsuccessful status code
+        response.raise_for_status()
         data = response.json()
         token = data.get("token_id")
         expiry_seconds = int(data.get("expire_in_seconds", 3600))
@@ -31,17 +30,15 @@ def generate_access_token():
 
 def get_sensor_data(token):
     headers = {'content-type': 'application/json', 'Authorization': f'Bearer {token}'}
-    url = f"https://webapi.ubibot.com/channels/{UBI_CHANNEL_ID}/feeds.json"
-    params = {'api_key': UBI_READ_API_KEY}
+    url = f"https://webapi.ubibot.com/channels/{UBI_CHANNEL_ID}"
     try:
-        response = requests.get(url, headers=headers, params=params)
+        response = requests.get(url, headers=headers)
         response.raise_for_status()
         sensor_data = response.json()
-        latest_data = sensor_data.get('feeds', [])[0] if sensor_data.get('feeds') else {}
-        temperature = latest_data.get('field1', {}).get('value')
-        humidity = latest_data.get('field2', {}).get('value')
-        print(f"Retrieved Sensor Data: Temperature - {temperature}, Humidity - {humidity}")
-        return {'temperature': temperature, 'humidity': humidity}
+        # Logic to extract temperature and humidity goes here
+        # ...
+        print(f"Retrieved Sensor Data: {sensor_data}")
+        return sensor_data
     except requests.HTTPError as http_err:
         print(f"HTTP error occurred: {http_err}, Response: {response.text}")
     except Exception as err:
