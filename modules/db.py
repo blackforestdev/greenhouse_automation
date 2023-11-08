@@ -123,7 +123,7 @@ class Database:
             logger.info("API token saved successfully.")
         except mysql.connector.Error as err:
             logger.error(f"Error saving API token: {err}")
-    '''
+    
     def get_api_token(self):
         """Retrieve the API token and its expiry time."""
         try:
@@ -159,5 +159,5 @@ class Database:
         except mysql.connector.Error as err:
             logger.error(f"Error retrieving API token: {err}")
             return None, None        
-
+    '''
 # Additional methods here.
