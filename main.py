@@ -83,7 +83,10 @@ def update_motor_status(motor_id):
 def sensor_data():
     try:
         with Database() as db:
-            token, expiry_time = db.get_api_token()
+            token_data = db.get_api_token()
+            token, expiry_time = token_data['token'], token_data['expiry_time']
+
+            print("Expiry time type:", type(expiry_time), "Value:", expiry_time)  # Debug statement
 
         if not token or datetime.now() >= expiry_time:
             token, expiry_time = generate_access_token()
@@ -100,7 +103,10 @@ def sensor_data():
 def handle_request_sensor_data():
     try:
         with Database() as db:
-            token, expiry_time = db.get_api_token()
+            token_data = db.get_api_token()
+            token, expiry_time = token_data['token'], token_data['expiry_time']
+
+            print("Expiry time type:", type(expiry_time), "Value:", expiry_time)  # Debug statement
 
         if not token or datetime.now() >= expiry_time:
             token, expiry_time = generate_access_token()
