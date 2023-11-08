@@ -150,22 +150,28 @@ function submitTimeSettings(rollUpTime, rollDownTime) {
 
 export function fetchSensorData() {
     fetch('/get_sensor_data')
-        .then(response => response.json())
-        .then(data => {
-            if(data.status === 'success') {
-                updateSensorDataUI(data.sensorData); // Adjust this according to the new data structure
-            } else {
-                console.error('Error fetching sensor data:', data.message);
-            }
-        })
-        .catch(error => console.error('Error fetching sensor data:', error));
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Update the UI with the received data
+        updateSensorDataUI(data);
+    })
+    .catch(error => {
+        console.error('Error fetching sensor data:', error);
+        // Handle error (possibly update UI to reflect the error)
+    });
 }
 
-function updateSensorDataUI(sensorData) {
-    document.getElementById('temperature').textContent = sensorData.temperature || "Not available";
-    document.getElementById('humidity').textContent = sensorData.humidity || "Not available";
-    // Add more elements as needed based on your new data structure
+function updateSensorDataUI(data) {
+    // Assuming 'temperature' and 'humidity' are IDs of elements in your HTML
+    document.getElementById('temperature').textContent = data.temperature || "Not available";
+    document.getElementById('humidity').textContent = data.humidity || "Not available";
     //document.getElementById('vpd').textContent = data.vpd || "Not available";
+    // Add any other UI updates needed for sensor data
 }
 
 document.addEventListener('DOMContentLoaded', () => {

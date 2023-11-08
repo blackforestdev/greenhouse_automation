@@ -1,29 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Standard meta tags, title, and stylesheets -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Greenhouse Automation Dashboard</title>
     <link href="https://stackpath.bootstrapcdn.com/bootswatch/4.5.2/darkly/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/solarized-dark.css">
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script type="module">
-        import {
-            initTimeUpdater,
-            initMotorSwitches,
-            fetchMotorStatuses,
-            handleSetTimeForm,
-            fetchSensorData
-        } from './static/js/domManager.js';
-
-        window.onload = function() {
-            initTimeUpdater();
-            initMotorSwitches();
-            handleSetTimeForm();
-            fetchSensorData();
-            setInterval(fetchMotorStatuses, 5000); // Fetch motor statuses every 5 seconds
-        };
-    </script>
 </head>
 
 <body>
@@ -34,13 +18,13 @@
     <!-- Current Status and Readings -->
     <div class="jumbotron">
         <h2>Current Status</h2>
+        <!-- Displaying real-time sensor data -->
         <p><strong>Current Time:</strong> <span id="current-time">Loading...</span></p>
         <p><strong>Roll Up Time:</strong> <span id="roll-up-time">Loading...</span></p>
         <p><strong>Roll Down Time:</strong> <span id="roll-down-time">Loading...</span></p>
         <p><strong>Temperature:</strong> <span id="temperature">Loading...</span></p>
         <p><strong>Humidity:</strong> <span id="humidity">Loading...</span></p>
         <p><strong>VPD:</strong> <span id="vpd">Loading...</span></p>
-        <!-- Add more environmental sensor data here as needed -->
     </div>
 
     <!-- Manual Controls -->
@@ -89,8 +73,25 @@
     </div>
 </div>
 
-<!-- WebSocket for UI control locally hosted in static/js/socket.io.js -->
+<!-- WebSocket and script imports -->
 <script src="{{ url_for('static', filename='js/socket.io.js') }}"></script>
+<script type="module">
+    import {
+        initTimeUpdater,
+        initMotorSwitches,
+        fetchMotorStatuses,
+        handleSetTimeForm,
+        fetchSensorData
+    } from '/static/js/domManager.js';
+
+    window.onload = function() {
+        initTimeUpdater();
+        initMotorSwitches();
+        handleSetTimeForm();
+        fetchSensorData();
+        setInterval(fetchMotorStatuses, 5000); // Fetch motor statuses every 5 seconds
+    };
+</script>
 
 </body>
 </html>

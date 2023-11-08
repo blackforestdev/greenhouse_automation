@@ -86,17 +86,12 @@ def sensor_data():
             token_data = db.get_api_token()
             token, expiry_time = token_data['token'], token_data['expiry_time']
 
-            if isinstance(expiry_time, str):
-                expiry_time = datetime.strptime(expiry_time, '%Y-%m-%d %H:%M:%S')
-
-            if not token or (expiry_time and datetime.now() >= expiry_time):
+            if not token or datetime.now() >= expiry_time:
                 token, expiry_time = generate_access_token()
-                with Database() as db:
-                    db.save_api_token(token, expiry_time)
+                db.save_api_token(token, expiry_time)
 
-            channel_id = os.getenv('UBI_CHANNEL_ID')
-            data = fetch_sensor_data(token, channel_id)
-            return jsonify(data)
+        data = get_sensor_data(token)
+        return jsonify(data)
     except Exception as e:
         app.logger.error("Failed to fetch sensor data: %s", e)
         return jsonify({'status': 'error', 'message': str(e)}), 500
@@ -108,14 +103,12 @@ def handle_request_sensor_data():
             token_data = db.get_api_token()
             token, expiry_time = token_data['token'], token_data['expiry_time']
 
-            # No need to parse if expiry_time is already a datetime object
-            if not token or (expiry_time and datetime.now() >= expiry_time):
+            if not token or datetime.now() >= expiry_time:
                 token, expiry_time = generate_access_token()
-                with Database() as db:
-                    db.save_api_token(token, expiry_time)
+                db.save_api_token(token, expiry_time)
 
-            data = get_sensor_data(token)
-            socketio.emit('sensor_data_response', data)
+        data = get_sensor_data(token)
+        socketio.emit('sensor_data_response', data)
     except Exception as e:
         app.logger.error("WebSocket: Failed to fetch sensor data: %s", e)
         socketio.emit('sensor_data_error', {'status': 'error', 'message': str(e)})

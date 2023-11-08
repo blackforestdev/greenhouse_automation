@@ -95,42 +95,22 @@ class Database:
         """Save the API token and its expiry time."""
         try:
             query = "REPLACE INTO api_tokens (token, expiry_time) VALUES (%s, %s)"
-            # Convert expiry_time to string format if it's a datetime object
-            expiry_time_str = expiry_time.strftime('%Y-%m-%d %H:%M:%S') if isinstance(expiry_time, datetime) else expiry_time
-            values = (token, expiry_time_str)
+            values = (token, expiry_time)
             self.cursor.execute(query, values)
             self.connection.commit()
             logger.info("API token saved successfully.")
         except mysql.connector.Error as err:
-            logger.error(f"Error saving API token: {err}") 
-    '''
+            logger.error(f"Error saving API token: {err}")
+
     def get_api_token(self):
         """Retrieve the API token and its expiry time."""
         try:
             query = "SELECT token, expiry_time FROM api_tokens LIMIT 1"
             self.cursor.execute(query)
             result = self.cursor.fetchone()
-            if result:
-                # Convert expiry_time from string to datetime object
-                token, expiry_time_str = result
-                expiry_time = datetime.strptime(expiry_time_str, '%Y-%m-%d %H:%M:%S') if expiry_time_str else None
-                return token, expiry_time
-            return None, None
-        except mysql.connector.Error as err:
-            logger.error(f"Error retrieving API token: {err}")
-            return None, None
-    '''
-    def get_api_token(self):
-        """Retrieve the API token and its expiry time."""
-        try:
-            query = "SELECT token, expiry_time FROM api_tokens LIMIT 1"
-            self.cursor.execute(query)
-            result = self.cursor.fetchone()
-            # Return as is, because expiry_time should already be a datetime object
             return result if result else (None, None)
         except mysql.connector.Error as err:
             logger.error(f"Error retrieving API token: {err}")
             return None, None
 
-
-# Additional methods here.
+# Additional methods here.UbiBot_Get_TEMP_HUMI_Data_Tool.py
