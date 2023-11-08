@@ -91,7 +91,7 @@ class Database:
             logger.info(f"Motor status for motor_id={motor_id} updated successfully to {status}.")
         except mysql.connector.Error as err:
             logger.error(f"Error updating motor status for motor_id={motor_id}: {err}")
-
+    '''
     def save_api_token(self, token, expiry_time):
         if isinstance(expiry_time, datetime):
             expiry_time = expiry_time.strftime('%Y-%m-%d %H:%M:%S')  # Convert the format for the database
@@ -100,6 +100,23 @@ class Database:
             query = "REPLACE INTO api_tokens (token, expiry_time) VALUES (%s, %s)"
             # Ensure expiry_time is formatted correctly for MySQL
             expiry_time_str = expiry_time.strftime('%Y-%m-%d %H:%M:%S')
+            values = (token, expiry_time_str)
+            self.cursor.execute(query, values)
+            self.connection.commit()
+            logger.info("API token saved successfully.")
+        except mysql.connector.Error as err:
+            logger.error(f"Error saving API token: {err}")
+    '''
+    def save_api_token(self, token, expiry_time):
+        """Save the API token and its expiry time."""
+        try:
+            # Convert expiry_time to string format if it's a datetime object
+            if isinstance(expiry_time, datetime):
+                expiry_time_str = expiry_time.strftime('%Y-%m-%d %H:%M:%S')
+            else:
+                expiry_time_str = expiry_time
+
+            query = "REPLACE INTO api_tokens (token, expiry_time) VALUES (%s, %s)"
             values = (token, expiry_time_str)
             self.cursor.execute(query, values)
             self.connection.commit()
@@ -126,23 +143,21 @@ class Database:
         except mysql.connector.Error as err:
             logger.error(f"Error retrieving API token: {err}")
             return None, None
-    '''        
-    def save_api_token(self, token, expiry_time):
-        """Save the API token and its expiry time."""
+    '''
+    def get_api_token(self):
+        """Retrieve the API token and its expiry time."""
         try:
-            # Convert expiry_time to string format if it's a datetime object
-            if isinstance(expiry_time, datetime):
-                expiry_time_str = expiry_time.strftime('%Y-%m-%d %H:%M:%S')
-            else:
-                expiry_time_str = expiry_time
-
-            query = "REPLACE INTO api_tokens (token, expiry_time) VALUES (%s, %s)"
-            values = (token, expiry_time_str)
-            self.cursor.execute(query, values)
-            self.connection.commit()
-            logger.info("API token saved successfully.")
+            query = "SELECT token, expiry_time FROM api_tokens LIMIT 1"
+            self.cursor.execute(query)
+            result = self.cursor.fetchone()
+            if result:
+                # Convert the expiry_time to a datetime object if it's not None
+                token, expiry_time_str = result
+                expiry_time = datetime.strptime(expiry_time_str, '%Y-%m-%d %H:%M:%S') if expiry_time_str else None
+                return token, expiry_time
+            return None, None
         except mysql.connector.Error as err:
-            logger.error(f"Error saving API token: {err}")
-
+            logger.error(f"Error retrieving API token: {err}")
+            return None, None        
 
 # Additional methods here.
