@@ -12,7 +12,7 @@ from modules import motors as motor_control
 from modules.sensors import fetch_sensor_data
 from app_logging.logging_module import setup_logging
 from app_logging.error_handlers import handle_404
-from modules.api_utils import refresh_api_token
+from modules.api_utils import generate_access_token, get_sensor_data
 
 # Load the .env file
 load_dotenv()
@@ -83,15 +83,15 @@ def update_motor_status(motor_id):
 def sensor_data():
     try:
         with Database() as db:
-            token, expiry_time = db.get_api_token()  # Directly unpack the tuple
+            token, expiry_time = db.get_api_token()
 
-            if not token or (expiry_time and datetime.now() >= expiry_time):
-                token, expiry_time = refresh_api_token()
-                with Database() as db:
-                    db.save_api_token(token, expiry_time)
+        if not token or datetime.now() >= expiry_time:
+            token, expiry_time = generate_access_token()
+            with Database() as db:
+                db.save_api_token(token, expiry_time)
 
-            data = fetch_sensor_data(token, os.getenv('UBI_CHANNEL_ID'))
-            return jsonify(data)
+        data = get_sensor_data(token)
+        return jsonify(data)
     except Exception as e:
         app.logger.error("Failed to fetch sensor data: %s", e)
         return jsonify({'status': 'error', 'message': str(e)}), 500
@@ -100,15 +100,15 @@ def sensor_data():
 def handle_request_sensor_data():
     try:
         with Database() as db:
-            token, expiry_time = db.get_api_token()  # Directly unpack the tuple
+            token, expiry_time = db.get_api_token()
 
-            if not token or (expiry_time and datetime.now() >= expiry_time):
-                token, expiry_time = refresh_api_token()
-                with Database() as db:
-                    db.save_api_token(token, expiry_time)
+        if not token or datetime.now() >= expiry_time:
+            token, expiry_time = generate_access_token()
+            with Database() as db:
+                db.save_api_token(token, expiry_time)
 
-            data = fetch_sensor_data(token, os.getenv('UBI_CHANNEL_ID'))
-            socketio.emit('sensor_data_response', data)
+        data = get_sensor_data(token)
+        socketio.emit('sensor_data_response', data)
     except Exception as e:
         app.logger.error("WebSocket: Failed to fetch sensor data: %s", e)
         socketio.emit('sensor_data_error', {'status': 'error', 'message': str(e)})

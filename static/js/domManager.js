@@ -150,15 +150,22 @@ function submitTimeSettings(rollUpTime, rollDownTime) {
 
 export function fetchSensorData() {
     fetch('/get_sensor_data')
-    .then(response => response.json())
-    .then(data => updateSensorDataUI(data))
-    .catch(error => console.error('Error fetching sensor data:', error));
+        .then(response => response.json())
+        .then(data => {
+            if(data.status === 'success') {
+                updateSensorDataUI(data.sensorData); // Adjust this according to the new data structure
+            } else {
+                console.error('Error fetching sensor data:', data.message);
+            }
+        })
+        .catch(error => console.error('Error fetching sensor data:', error));
 }
 
-function updateSensorDataUI(data) {
-    document.getElementById('temperature').textContent = data.temperature || "Not available";
-    document.getElementById('humidity').textContent = data.humidity || "Not available";
-    document.getElementById('vpd').textContent = data.vpd || "Not available";
+function updateSensorDataUI(sensorData) {
+    document.getElementById('temperature').textContent = sensorData.temperature || "Not available";
+    document.getElementById('humidity').textContent = sensorData.humidity || "Not available";
+    // Add more elements as needed based on your new data structure
+    //document.getElementById('vpd').textContent = data.vpd || "Not available";
 }
 
 document.addEventListener('DOMContentLoaded', () => {
