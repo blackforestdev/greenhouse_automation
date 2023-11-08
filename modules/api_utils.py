@@ -30,15 +30,25 @@ def generate_access_token():
 
 def get_sensor_data(token):
     headers = {'content-type': 'application/json', 'Authorization': f'Bearer {token}'}
-    url = f"https://webapi.ubibot.com/channels/{UBI_CHANNEL_ID}"
+    url = "https://webapi.ubibot.com/channels"
+    params = {'token_id': token}
     try:
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, params=params)
         response.raise_for_status()
         sensor_data = response.json()
-        # Logic to extract temperature and humidity goes here
-        # ...
-        print(f"Retrieved Sensor Data: {sensor_data}")
-        return sensor_data
+
+        # Extracting temperature and humidity for the specific channel
+        for channel in sensor_data.get('channels', []):
+            if channel['channel_id'] == UBI_CHANNEL_ID:
+                last_values = json.loads(channel.get('last_values', '{}'))
+                temperature = last_values.get('field1', {}).get('value')
+                humidity = last_values.get('field2', {}).get('value')
+                print(f"Retrieved Sensor Data: Temperature - {temperature}, Humidity - {humidity}")
+                return {'temperature': temperature, 'humidity': humidity}
+        else:
+            print("Channel not found.")
+            return {}
+
     except requests.HTTPError as http_err:
         print(f"HTTP error occurred: {http_err}, Response: {response.text}")
     except Exception as err:
