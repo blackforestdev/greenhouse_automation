@@ -110,10 +110,7 @@ def handle_request_sensor_data():
             token_data = db.get_api_token()
             token, expiry_time = token_data['token'], token_data['expiry_time']
 
-            # Check if expiry_time is a string and convert if necessary
-            if isinstance(expiry_time, str):
-                expiry_time = datetime.strptime(expiry_time, '%Y-%m-%d %H:%M:%S')
-
+            # No need to parse if expiry_time is already a datetime object
             if not token or (expiry_time and datetime.now() >= expiry_time):
                 token, expiry_time = generate_access_token()
                 with Database() as db:
