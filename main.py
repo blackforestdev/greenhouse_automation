@@ -12,7 +12,7 @@ from modules import motors as motor_control
 from modules.sensors import fetch_sensor_data
 from app_logging.logging_module import setup_logging
 from app_logging.error_handlers import handle_404
-from modules.api_utils import generate_access_token, get_sensor_data, refresh_api_token
+from modules.api_utils import generate_access_token, get_sensor_data
 
 # Load the .env file
 load_dotenv()
@@ -85,19 +85,18 @@ def sensor_data():
         with Database() as db:
             token_data = db.get_api_token()
             token, expiry_time = token_data['token'], token_data['expiry_time']
-
             print("Expiry time type:", type(expiry_time), "Value:", expiry_time)  # Debug statement
-
             # Check if expiry_time is a string and convert if necessary
             if isinstance(expiry_time, str):
                 expiry_time = datetime.strptime(expiry_time, '%Y-%m-%d %H:%M:%S')
 
+            # Generate a new access token if the current one is invalid or expired
             if not token or (expiry_time and datetime.now() >= expiry_time):
-                token, expiry_time = refresh_api_token()
+                token, expiry_time = generate_access_token()
                 with Database() as db:
                     db.save_api_token(token, expiry_time)
 
-            data = fetch_sensor_data(token, os.getenv('UBI_CHANNEL_ID'))
+            data = fetch_sensor_data(token)
             return jsonify(data)
     except Exception as e:
         app.logger.error("Failed to fetch sensor data: %s", e)
