@@ -28,6 +28,9 @@ To set up the project, follow these steps:
    ```
 3. sudo apt-get update
 sudo apt-get install nodejs npm
+cd greenhouse_automation
+npm install
+
 4. install the database: 
 sudo apt-get install mariadb 
 ```configure the database by running setup_config.py```

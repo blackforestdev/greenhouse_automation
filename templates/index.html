@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Greenhouse Automation Dashboard</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootswatch/4.5.2/darkly/bootstrap.min.css" rel="stylesheet">
+    <link href="/node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/solarized-dark.css">
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 </head>
@@ -77,6 +77,10 @@
 
     <!-- WebSocket and script imports -->
     <script src="{{ url_for('static', filename='js/socket.io.js') }}"></script>
+
+    <!-- Bootstrap JavaScript -->
+    <script src="/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
     <script type="module">
         import {
             initTimeUpdater,
