@@ -26,8 +26,11 @@ To set up the project, follow these steps:
    ```bash
    pip install -r requirements.txt
    ```
-3. cd [your_project_directory]
-npm install
+3. sudo apt-get update
+sudo apt-get install nodejs npm
+4. install the database: 
+sudo apt-get install mariadb 
+```configure the database by running setup_config.py```
 
 ## Usage
 To run the application:
@@ -47,11 +50,5 @@ This project is licensed under the MIT License.
 
 
 ### Additional Notes:
-- Make sure to replace `[your_project_directory]` with the actual path where your project is located.
-- If you have specific Node.js and npm versions that are required, it's good to mention those versions in the `Prerequisites` section.
-- If your project uses a `package.json` file (which it should, if you're using npm), include instructions on how to use it, especially if there are scripts set up for building or running the project.
-- Consider adding a section on how to set up and run any databases (like MariaDB) that are required for the project.
-
-These updates will provide clear instructions to developers on how to set up and run your project, including the installation of Node.js, which is crucial for managing front-end dependencies.
 
 
