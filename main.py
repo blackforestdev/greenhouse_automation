@@ -117,10 +117,15 @@ def handle_request_sensor_data():
 def handle_request_current_times():
     try:
         with Database() as db:
-            # Assuming these methods exist in your database handler
-            roll_up_time = db.get_roll_up_time()
-            roll_down_time = db.get_roll_down_time()
-            socketio.emit('current_times', {'roll_up': roll_up_time, 'roll_down': roll_down_time})
+            time_settings = db.get_latest_time_settings()
+            if time_settings:
+                roll_up_time = time_settings['roll_up_time']
+                roll_down_time = time_settings['roll_down_time']
+                socketio.emit('current_times', {'roll_up': roll_up_time, 'roll_down': roll_down_time})
+            else:
+                # Handle the case where no time settings are found
+                logger.info("No time settings found.")
+                socketio.emit('current_times', {'roll_up': "Not set", 'roll_down': "Not set"})
     except Exception as e:
         logger.error("Failed to fetch current times: %s", e)
 
