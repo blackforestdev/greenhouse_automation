@@ -30,6 +30,7 @@ To set up the project, follow these steps:
 sudo apt-get install nodejs npm
 cd greenhouse_automation
 npm install
+npm install socket.io-client ## cp to static/js
 
 4. install the database: 
 sudo apt-get install mariadb 
