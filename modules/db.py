@@ -38,16 +38,20 @@ class Database:
         except mysql.connector.Error as err:
             logger.error(f"Error closing database resources: {err}")
 
-    def save_time_settings(self, roll_up_time, roll_down_time):
-        """Save the roll up and roll down times to the database."""
+    def update_time_settings(self, roll_up_time, roll_down_time):
+        """Update the roll up and roll down times in the database."""
         try:
-            query = "INSERT INTO time_settings (roll_up_time, roll_down_time) VALUES (%s, %s)"
+            query = """
+            INSERT INTO time_settings (id, roll_up_time, roll_down_time) 
+            VALUES (1, %s, %s) 
+            ON DUPLICATE KEY UPDATE roll_up_time = VALUES(roll_up_time), roll_down_time = VALUES(roll_down_time)
+            """
             values = (roll_up_time, roll_down_time)
             self.cursor.execute(query, values)
             self.connection.commit()
-            logger.info("Time settings saved successfully.")
+            logger.info("Time settings updated successfully.")
         except mysql.connector.Error as err:
-            logger.error(f"Error saving time settings: {err}")
+            logger.error(f"Error updating time settings: {err}")
 
     def get_latest_time_settings(self):
         """Retrieve the latest roll up and roll down times."""
