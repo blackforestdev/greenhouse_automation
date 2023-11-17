@@ -49,7 +49,7 @@ def set_time():
 
     try:
         with Database() as db:
-            db.save_time_settings(roll_up_time, roll_down_time)
+            db.update_time_settings(roll_up_time, roll_down_time)  # Method name changed to reflect the new functionality
         socketio.emit('update_time_settings', {'roll_up_time': roll_up_time, 'roll_down_time': roll_down_time})
         return jsonify({'status': 'success'}), 200
     except Exception as e:
