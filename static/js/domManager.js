@@ -1,7 +1,7 @@
 // static/js/domManager.js
 
-import { getCurrentTime } from './timeManager.js';
-import { formatTime12Hour } from './timeManager.js';
+import { getCurrentTime, formatTime12Hour } from './timeManager.js';
+
 
 const socket = io();
 
