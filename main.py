@@ -113,6 +113,17 @@ def handle_request_sensor_data():
         app.logger.error("WebSocket: Failed to fetch sensor data: %s", e)
         socketio.emit('sensor_data_error', {'status': 'error', 'message': str(e)})
 
+@socketio.on('request_current_times')
+def handle_request_current_times():
+    try:
+        with Database() as db:
+            # Assuming these methods exist in your database handler
+            roll_up_time = db.get_roll_up_time()
+            roll_down_time = db.get_roll_down_time()
+            socketio.emit('current_times', {'roll_up': roll_up_time, 'roll_down': roll_down_time})
+    except Exception as e:
+        logger.error("Failed to fetch current times: %s", e)
+
 @socketio.on('trigger_motor_action')
 def handle_motor_action(data):
     action = data.get('action')
