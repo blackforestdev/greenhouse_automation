@@ -119,9 +119,9 @@ def handle_request_current_times():
         with Database() as db:
             time_settings = db.get_latest_time_settings()
             if time_settings:
-                # Convert timedelta objects to strings
-                roll_up_time = str(time_settings['roll_up_time'])
-                roll_down_time = str(time_settings['roll_down_time'])
+                # Convert time strings to 12-hour format
+                roll_up_time = datetime.strptime(time_settings['roll_up_time'], '%H:%M:%S').strftime('%I:%M %p')
+                roll_down_time = datetime.strptime(time_settings['roll_down_time'], '%H:%M:%S').strftime('%I:%M %p')
 
                 socketio.emit('current_times', {'roll_up': roll_up_time, 'roll_down': roll_down_time})
             else:
