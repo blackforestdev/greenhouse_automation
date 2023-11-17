@@ -119,8 +119,10 @@ def handle_request_current_times():
         with Database() as db:
             time_settings = db.get_latest_time_settings()
             if time_settings:
-                roll_up_time = time_settings['roll_up_time']
-                roll_down_time = time_settings['roll_down_time']
+                # Convert timedelta objects to strings
+                roll_up_time = str(time_settings['roll_up_time'])
+                roll_down_time = str(time_settings['roll_down_time'])
+
                 socketio.emit('current_times', {'roll_up': roll_up_time, 'roll_down': roll_down_time})
             else:
                 # Handle the case where no time settings are found
