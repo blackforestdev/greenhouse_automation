@@ -1,6 +1,6 @@
 from flask import Flask, render_template, jsonify, request
 from flask_socketio import SocketIO
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 import os
 import traceback
@@ -119,9 +119,10 @@ def handle_request_current_times():
         with Database() as db:
             time_settings = db.get_latest_time_settings()
             if time_settings:
-                # Convert time strings to 12-hour format
-                roll_up_time = datetime.strptime(time_settings['roll_up_time'], '%H:%M:%S').strftime('%I:%M %p')
-                roll_down_time = datetime.strptime(time_settings['roll_down_time'], '%H:%M:%S').strftime('%I:%M %p')
+                # Assuming roll_up_time and roll_down_time are timedelta objects
+                baseline = datetime.combine(datetime.today(), datetime.min.time())
+                roll_up_time = (baseline + time_settings['roll_up_time']).strftime('%I:%M %p')
+                roll_down_time = (baseline + time_settings['roll_down_time']).strftime('%I:%M %p')
 
                 socketio.emit('current_times', {'roll_up': roll_up_time, 'roll_down': roll_down_time})
             else:
@@ -130,7 +131,7 @@ def handle_request_current_times():
                 socketio.emit('current_times', {'roll_up': "Not set", 'roll_down': "Not set"})
     except Exception as e:
         logger.error("Failed to fetch current times: %s", e)
-
+        
 @socketio.on('trigger_motor_action')
 def handle_motor_action(data):
     action = data.get('action')
