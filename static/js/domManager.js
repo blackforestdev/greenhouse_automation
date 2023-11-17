@@ -1,4 +1,7 @@
+// static/js/domManager.js
+
 import { getCurrentTime } from './timeManager.js';
+import { formatTime12Hour } from './timeManager.js';
 
 const socket = io();
 
@@ -59,8 +62,8 @@ export function requestTimes() {
 }
 
 socket.on('current_times', data => {
-    document.getElementById('roll-up-time').textContent = data.roll_up || "Not set";
-    document.getElementById('roll-down-time').textContent = data.roll_down || "Not set";
+    document.getElementById('roll-up-time').textContent = data.roll_up ? formatTime12Hour(data.roll_up) : "Not set";
+    document.getElementById('roll-down-time').textContent = data.roll_down ? formatTime12Hour(data.roll_down) : "Not set";
 });
 
 export function initMotorSwitches() {
