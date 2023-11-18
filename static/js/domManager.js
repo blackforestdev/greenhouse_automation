@@ -179,10 +179,9 @@ export function fetchSensorData() {
 }
 
 function updateSensorDataUI(data) {
-    // Assuming 'temperature' and 'humidity' are IDs of elements in your HTML
-    document.getElementById('temperature').textContent = data.temperature || "Not available";
-    document.getElementById('humidity').textContent = data.humidity || "Not available";
-    document.getElementById('vpd').textContent = data.vpd.toFixed(2) || "Not available";
+    document.getElementById('temperature').textContent = data.temperature ? `${data.temperature.toFixed(2)}°C` : "Not available";
+    document.getElementById('humidity').textContent = data.humidity ? `${data.humidity.toFixed(2)}%` : "Not available";
+    document.getElementById('vpd').textContent = data.vpd ? `${data.vpd.toFixed(2)} kPa` : "Not available";
     // Add any other UI updates needed for sensor data
 }
 
