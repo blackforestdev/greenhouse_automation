@@ -85,24 +85,24 @@ def update_motor_status(motor_id):
     except Exception as e:
         logger.error(f"Failed to update motor status for {motor_id}: {e}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
-'''
-@app.route('/get_sensor_data')
-def sensor_data():
-    try:
-        with Database() as db:
-            token_data = db.get_api_token()
-            token, expiry_time = token_data['token'], token_data['expiry_time']
 
-            if not token or datetime.now() >= expiry_time:
-                token, expiry_time = generate_access_token()
-                db.save_api_token(token, expiry_time)
+#@app.route('/get_sensor_data')
+#def sensor_data():
+#    try:
+#        with Database() as db:
+#            token_data = db.get_api_token()
+#            token, expiry_time = token_data['token'], token_data['expiry_time']
+#
+#            if not token or datetime.now() >= expiry_time:
+#                token, expiry_time = generate_access_token()
+#                db.save_api_token(token, expiry_time)
+#
+#        data = get_sensor_data(token)
+#        return jsonify(data)
+#    except Exception as e:
+#        app.logger.error("Failed to fetch sensor data: %s", e)
+#        return jsonify({'status': 'error', 'message': str(e)}), 500
 
-        data = get_sensor_data(token)
-        return jsonify(data)
-    except Exception as e:
-        app.logger.error("Failed to fetch sensor data: %s", e)
-        return jsonify({'status': 'error', 'message': str(e)}), 500
-'''
 # new code suggested code for get_sensor_data
 @app.route('/get_sensor_data')
 def sensor_data():
@@ -116,24 +116,24 @@ def sensor_data():
     except Exception as e:
         app.logger.error("Failed to fetch sensor data: %s", e)
         return jsonify({'status': 'error', 'message': str(e)}), 500
-'''
-@socketio.on('request_sensor_data')
-def handle_request_sensor_data():
-    try:
-        with Database() as db:
-            token_data = db.get_api_token()
-            token, expiry_time = token_data['token'], token_data['expiry_time']
 
-            if not token or datetime.now() >= expiry_time:
-                token, expiry_time = generate_access_token()
-                db.save_api_token(token, expiry_time)
+#@socketio.on('request_sensor_data')
+#def handle_request_sensor_data():
+#    try:
+#        with Database() as db:
+#            token_data = db.get_api_token()
+#            token, expiry_time = token_data['token'], token_data['expiry_time']
+#
+#            if not token or datetime.now() >= expiry_time:
+#                token, expiry_time = generate_access_token()
+#                db.save_api_token(token, expiry_time)
+#
+#        data = get_sensor_data(token)
+#        socketio.emit('sensor_data_response', data)
+#    except Exception as e:
+#        app.logger.error("WebSocket: Failed to fetch sensor data: %s", e)
+#        socketio.emit('sensor_data_error', {'status': 'error', 'message': str(e)})
 
-        data = get_sensor_data(token)
-        socketio.emit('sensor_data_response', data)
-    except Exception as e:
-        app.logger.error("WebSocket: Failed to fetch sensor data: %s", e)
-        socketio.emit('sensor_data_error', {'status': 'error', 'message': str(e)})
-'''
 # new code for request_sensor_data
 @socketio.on('request_sensor_data')
 def handle_request_sensor_data():
