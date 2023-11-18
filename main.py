@@ -73,21 +73,41 @@ def get_motor_statuses():
         logger.error(f"Failed to fetch motor statuses: {e}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
-@app.route('/motor_status/<int:motor_id>', methods=['POST'])
-def update_motor_status(motor_id):
+# old code
+#@app.route('/motor_status/<int:motor_id>', methods=['POST'])
+#def update_motor_status(motor_id):
+#    try:
+#        data = request.get_json()
+#        status = data['status']
+#
+#        with Database() as db:
+#            db.update_motor_status(motor_id, status)
+#       
+#        # Broadcast the updated status to all connected clients
+#        socketio.emit('motor_status_updated', {'motor_id': motor_id, 'status': status})
+#        
+#        return jsonify({'status': 'success'}), 200
+#    except Exception as e:
+#        logger.error(f"Failed to update motor status for {motor_id}: {e}")
+#        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+# new code
+@app.route('/motor_status/<string:motor_switch_id>', methods=['POST'])
+def update_motor_status(motor_switch_id):
     try:
         data = request.get_json()
         status = data['status']
 
         with Database() as db:
-            db.update_motor_status(motor_id, status)
+            # Assuming you have a method to update the motor status using the switch ID
+            db.update_motor_status_by_switch_id(motor_switch_id, status)
         
         # Broadcast the updated status to all connected clients
-        socketio.emit('motor_status_updated', {'motor_id': motor_id, 'status': status})
+        socketio.emit('motor_status_updated', {'motor_switch_id': motor_switch_id, 'status': status})
         
         return jsonify({'status': 'success'}), 200
     except Exception as e:
-        logger.error(f"Failed to update motor status for {motor_id}: {e}")
+        logger.error(f"Failed to update motor status for {motor_switch_id}: {e}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/get_sensor_data')
