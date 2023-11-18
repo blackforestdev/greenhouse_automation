@@ -119,19 +119,17 @@ def handle_request_current_times():
         with Database() as db:
             time_settings = db.get_latest_time_settings()
             if time_settings:
-                # Assuming roll_up_time and roll_down_time are timedelta objects
-                baseline = datetime.combine(datetime.today(), datetime.min.time())
-                roll_up_time = (baseline + time_settings['roll_up_time']).strftime('%I:%M %p')
-                roll_down_time = (baseline + time_settings['roll_down_time']).strftime('%I:%M %p')
+                # Format time as string (HH:MM:SS)
+                roll_up_time = time_settings['roll_up_time'].strftime('%H:%M:%S')
+                roll_down_time = time_settings['roll_down_time'].strftime('%H:%M:%S')
 
                 socketio.emit('current_times', {'roll_up': roll_up_time, 'roll_down': roll_down_time})
             else:
-                # Handle the case where no time settings are found
                 logger.info("No time settings found.")
                 socketio.emit('current_times', {'roll_up': "Not set", 'roll_down': "Not set"})
     except Exception as e:
         logger.error("Failed to fetch current times: %s", e)
-        
+       
 @socketio.on('trigger_motor_action')
 def handle_motor_action(data):
     action = data.get('action')
