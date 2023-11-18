@@ -85,7 +85,7 @@ def update_motor_status(motor_id):
     except Exception as e:
         logger.error(f"Failed to update motor status for {motor_id}: {e}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
-
+'''
 @app.route('/get_sensor_data')
 def sensor_data():
     try:
@@ -102,7 +102,21 @@ def sensor_data():
     except Exception as e:
         app.logger.error("Failed to fetch sensor data: %s", e)
         return jsonify({'status': 'error', 'message': str(e)}), 500
-
+'''
+# new code suggested code for get_sensor_data
+@app.route('/get_sensor_data')
+def sensor_data():
+    try:
+        # Fetch sensor data (including VPD calculation) from sensors.py
+        sensor_data = fetch_sensor_data()
+        if sensor_data:
+            return jsonify(sensor_data), 200
+        else:
+            return jsonify({'status': 'error', 'message': 'No sensor data available'}), 404
+    except Exception as e:
+        app.logger.error("Failed to fetch sensor data: %s", e)
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+'''
 @socketio.on('request_sensor_data')
 def handle_request_sensor_data():
     try:
@@ -116,6 +130,20 @@ def handle_request_sensor_data():
 
         data = get_sensor_data(token)
         socketio.emit('sensor_data_response', data)
+    except Exception as e:
+        app.logger.error("WebSocket: Failed to fetch sensor data: %s", e)
+        socketio.emit('sensor_data_error', {'status': 'error', 'message': str(e)})
+'''
+# new code for request_sensor_data
+@socketio.on('request_sensor_data')
+def handle_request_sensor_data():
+    try:
+        # Fetch sensor data (including VPD calculation) from sensors.py
+        sensor_data = fetch_sensor_data()
+        if sensor_data:
+            socketio.emit('sensor_data_response', sensor_data)
+        else:
+            socketio.emit('sensor_data_error', {'status': 'error', 'message': 'No sensor data available'})
     except Exception as e:
         app.logger.error("WebSocket: Failed to fetch sensor data: %s", e)
         socketio.emit('sensor_data_error', {'status': 'error', 'message': str(e)})
