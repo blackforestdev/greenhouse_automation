@@ -168,6 +168,7 @@ export function fetchSensorData() {
         return response.json();
     })
     .then(data => {
+        console.log("Received sensor data:", data); // added for debugging
         // Update the UI with the received data
         updateSensorDataUI(data);
     })
