@@ -182,7 +182,7 @@ function updateSensorDataUI(data) {
     // Assuming 'temperature' and 'humidity' are IDs of elements in your HTML
     document.getElementById('temperature').textContent = data.temperature || "Not available";
     document.getElementById('humidity').textContent = data.humidity || "Not available";
-    //document.getElementById('vpd').textContent = data.vpd || "Not available";
+    document.getElementById('vpd').textContent = data.vpd.toFixed(2) || "Not available";
     // Add any other UI updates needed for sensor data
 }
 
