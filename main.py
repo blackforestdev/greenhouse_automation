@@ -32,6 +32,13 @@ app.register_error_handler(404, handle_404)
 def before_request():
     logger.info("Request received at %s", datetime.now())
 
+def timedelta_to_time_string(timedelta_obj):
+    total_seconds = int(timedelta_obj.total_seconds())
+    hours = total_seconds // 3600
+    minutes = (total_seconds % 3600) // 60
+    seconds = total_seconds % 60
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d}"    
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -119,16 +126,15 @@ def handle_request_current_times():
         with Database() as db:
             time_settings = db.get_latest_time_settings()
             if time_settings:
-                # Assuming time_settings values are datetime.time objects
-                roll_up_time = time_settings['roll_up_time'].strftime('%H:%M:%S')
-                roll_down_time = time_settings['roll_down_time'].strftime('%H:%M:%S')
+                roll_up_time = timedelta_to_time_string(time_settings['roll_up_time'])
+                roll_down_time = timedelta_to_time_string(time_settings['roll_down_time'])
 
                 socketio.emit('current_times', {'roll_up': roll_up_time, 'roll_down': roll_down_time})
             else:
                 socketio.emit('current_times', {'roll_up': "Not set", 'roll_down': "Not set"})
     except Exception as e:
         logger.error("Failed to fetch current times: %s", e)
-       
+      
 @socketio.on('trigger_motor_action')
 def handle_motor_action(data):
     action = data.get('action')
