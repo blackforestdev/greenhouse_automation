@@ -62,8 +62,16 @@ export function requestTimes() {
 }
 
 socket.on('current_times', data => {
-    document.getElementById('roll-up-time').textContent = data.roll_up ? formatTime12Hour(data.roll_up) : "Not set";
-    document.getElementById('roll-down-time').textContent = data.roll_down ? formatTime12Hour(data.roll_down) : "Not set";
+    console.log("Received time data:", data);  // Log received data
+
+    const formattedRollUpTime = data.roll_up ? formatTime12Hour(data.roll_up) : "Not set";
+    const formattedRollDownTime = data.roll_down ? formatTime12Hour(data.roll_down) : "Not set";
+
+    console.log("Formatted Roll Up Time:", formattedRollUpTime);  // Log formatted time
+    console.log("Formatted Roll Down Time:", formattedRollDownTime);  // Log formatted time
+
+    document.getElementById('roll-up-time').textContent = formattedRollUpTime;
+    document.getElementById('roll-down-time').textContent = formattedRollDownTime;
 });
 
 export function initMotorSwitches() {

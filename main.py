@@ -113,19 +113,18 @@ def handle_request_sensor_data():
         app.logger.error("WebSocket: Failed to fetch sensor data: %s", e)
         socketio.emit('sensor_data_error', {'status': 'error', 'message': str(e)})
 
+# main.py
 @socketio.on('request_current_times')
 def handle_request_current_times():
     try:
         with Database() as db:
             time_settings = db.get_latest_time_settings()
             if time_settings:
-                # Format time as string (HH:MM:SS)
                 roll_up_time = time_settings['roll_up_time'].strftime('%H:%M:%S')
                 roll_down_time = time_settings['roll_down_time'].strftime('%H:%M:%S')
 
                 socketio.emit('current_times', {'roll_up': roll_up_time, 'roll_down': roll_down_time})
             else:
-                logger.info("No time settings found.")
                 socketio.emit('current_times', {'roll_up': "Not set", 'roll_down': "Not set"})
     except Exception as e:
         logger.error("Failed to fetch current times: %s", e)
