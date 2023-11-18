@@ -37,7 +37,7 @@ def fetch_sensor_data():
                             (current_timestamp, temperature, humidity, vpd))
             return sensor_data
         else:
-            return None    except Exception as e:
+            return None    
+    except Exception as e:
         print(f"Error fetching sensor data and calculating VPD: {e}")
         return None
-        
