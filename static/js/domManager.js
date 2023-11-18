@@ -86,15 +86,25 @@ export function initMotorSwitches() {
 
     motorSwitches.forEach(motor => {
         console.log(`Checking motor switch with ID: ${motor.id}`);
+        
         const switchElem = document.getElementById(motor.id);
-        if (switchElem) {
-            console.log(`Found switch element for ID: ${motor.id}`);
-            const status = switchElem.checked ? 'Active' : 'Deactivated';
-            document.getElementById(motor.statusElem).textContent = status;
-            updateMotorStatus(motor.id, status);
-        } else {
+        if (!switchElem) {
             console.error(`Switch element not found for ID: ${motor.id}`);
+            return; // Skip this iteration if the element is not found
         }
+        
+        console.log(`Found switch element for ID: ${motor.id}`);
+        const status = switchElem.checked ? 'Active' : 'Deactivated';
+
+        // Ensure the corresponding status element exists before trying to update its textContent
+        const statusElem = document.getElementById(motor.statusElem);
+        if (statusElem) {
+            statusElem.textContent = status;
+        } else {
+            console.error(`Status element not found for ID: ${motor.statusElem}`);
+        }
+
+        updateMotorStatus(motor.id, status);
     });
 }
 
