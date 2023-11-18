@@ -73,7 +73,7 @@ def get_motor_statuses():
         logger.error(f"Failed to fetch motor statuses: {e}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
-@app.route('/motor_status/<motor_id>', methods=['POST'])
+@app.route('/motor_status/<int:motor_id>', methods=['POST'])
 def update_motor_status(motor_id):
     try:
         data = request.get_json()
@@ -81,6 +81,10 @@ def update_motor_status(motor_id):
 
         with Database() as db:
             db.update_motor_status(motor_id, status)
+        
+        # Broadcast the updated status to all connected clients
+        socketio.emit('motor_status_updated', {'motor_id': motor_id, 'status': status})
+        
         return jsonify({'status': 'success'}), 200
     except Exception as e:
         logger.error(f"Failed to update motor status for {motor_id}: {e}")
@@ -126,35 +130,56 @@ def handle_request_current_times():
                 socketio.emit('current_times', {'roll_up': "Not set", 'roll_down': "Not set"})
     except Exception as e:
         logger.error("Failed to fetch current times: %s", e)
-      
+
 @socketio.on('trigger_motor_action')
 def handle_motor_action(data):
     action = data.get('action')
+    motor_id = data.get('motor_id')  # Assuming the data contains motor_id
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    try:
-        motor_control.handle_action(action)
-        logger.info(f"Motor action '{action}' triggered at {timestamp}")
-        socketio.emit('motor_action_response', {'status': 'success', 'action': action, 'timestamp': timestamp})
-    except Exception as e:
-        logger.error(f"Error triggering motor action '{action}' at {timestamp}: {e}")
-        socketio.emit('motor_action_error', {'status': 'error', 'action': action, 'message': str(e), 'timestamp': timestamp})
 
+    try:
+        motor_control.perform_action(action, motor_id)  # Perform the motor action
+        logger.info(f"Motor action '{action}' triggered for motor_id={motor_id} at {timestamp}")
+        
+        # Update the motor status in the database
+        with Database() as db:
+            new_status = 'Active' if action == 'turn_on' else 'Inactive'
+            db.update_motor_status(motor_id, new_status)
+        
+        # Broadcast the updated status to all connected clients
+        socketio.emit('motor_action_response', {
+            'status': 'success', 
+            'action': action, 
+            'motor_id': motor_id, 
+            'timestamp': timestamp
+        })
+
+    except Exception as e:
+        logger.error(f"Error triggering motor action '{action}' for motor_id={motor_id} at {timestamp}: {e}")
+        socketio.emit('motor_action_error', {
+            'status': 'error', 
+            'action': action, 
+            'motor_id': motor_id, 
+            'message': str(e), 
+            'timestamp': timestamp
+        })
+      
 # Route for handling motor actions
-@app.route('/motor_action/<action>', methods=['POST'])
-def motor_action(action):
-    try:
-        data = request.get_json()
-        motor_statuses = data.get('motor_statuses')
-
+#@app.route('/motor_action/<action>', methods=['POST'])
+#def motor_action(action):
+#    try:
+#        data = request.get_json()
+#        motor_statuses = data.get('motor_statuses')
+#
         # Check and perform the action for each motor based on its status
-        for motor_id, is_active in motor_statuses.items():
-            if is_active:
-                motor_control.perform_action(action, motor_id)
+#        for motor_id, is_active in motor_statuses.items():
+#            if is_active:
+#                motor_control.perform_action(action, motor_id)
 
-        return jsonify({'status': 'success', 'action': action, 'message': f"{action} performed successfully on active motors"}), 200
-    except Exception as e:
-        logger.error(f"Error in motor action '{action}': {e}")
-        return jsonify({'status': 'error', 'message': str(e)}), 500
+#        return jsonify({'status': 'success', 'action': action, 'message': f"{action} performed successfully on active motors"}), 200
+#    except Exception as e:
+#        logger.error(f"Error in motor action '{action}': {e}")
+#        return jsonify({'status': 'error', 'message': str(e)}), 500
       
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000)
