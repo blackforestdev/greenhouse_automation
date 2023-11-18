@@ -75,6 +75,8 @@ socket.on('current_times', data => {
 });
 
 export function initMotorSwitches() {
+    console.log("Initializing motor switches...");
+
     const motorSwitches = [
         { id: 'sidewall-left-switch', statusElem: 'sidewall-left-status' },
         { id: 'sidewall-right-switch', statusElem: 'sidewall-right-status' },
@@ -83,12 +85,16 @@ export function initMotorSwitches() {
     ];
 
     motorSwitches.forEach(motor => {
+        console.log(`Checking motor switch with ID: ${motor.id}`);
         const switchElem = document.getElementById(motor.id);
-        switchElem.addEventListener('change', () => {
+        if (switchElem) {
+            console.log(`Found switch element for ID: ${motor.id}`);
             const status = switchElem.checked ? 'Active' : 'Deactivated';
             document.getElementById(motor.statusElem).textContent = status;
             updateMotorStatus(motor.id, status);
-        });
+        } else {
+            console.error(`Switch element not found for ID: ${motor.id}`);
+        }
     });
 }
 
