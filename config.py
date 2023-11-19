@@ -4,11 +4,10 @@ import os
 SECRET_KEY = os.environ.get('FLASK_SECRET_KEY', 'default_secret_key_for_local_development')
 DEBUG = bool(os.environ.get('FLASK_DEBUG', True))
 
-# Database configuration
 DB_CONFIG = {
     'host': os.environ.get('DB_HOST', 'localhost'),
-    'user': os.environ.get('DB_USER', 'bfadmin'),
-    'password': os.environ.get('DB_PASSWORD', '8-toS5v'),
+    'user': os.environ.get('DB_USER_NAME'),  # Use DB_USER_NAME from .env
+    'password': os.environ.get('DB_PASSWORD'),  # Use DB_PASSWORD from .env
     'database': os.environ.get('DB_NAME', 'greenhouse_automation')
 }
 
