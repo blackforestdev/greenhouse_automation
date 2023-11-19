@@ -6,7 +6,7 @@ DEBUG = bool(os.environ.get('FLASK_DEBUG', True))
 
 DB_CONFIG = {
     'host': os.environ.get('DB_HOST', 'localhost'),
-    'user': os.environ.get('DB_USER_NAME', 'default_user'),
+    'user': os.environ.get('DB_USER_NAME', 'greenhouse_automation'),
     'password': os.environ.get('DB_PASSWORD', 'default_password'),
     'database': os.environ.get('DB_NAME', 'greenhouse_automation')
 }
