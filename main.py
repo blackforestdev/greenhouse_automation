@@ -16,6 +16,11 @@ from modules.api_utils import generate_access_token, get_sensor_data
 
 # Load the .env file
 load_dotenv()
+# for debuging the credentials 
+print("DB Host:", os.environ.get('DB_HOST'))
+print("DB User:", os.environ.get('DB_USER_NAME'))
+print("DB Password:", os.environ.get('DB_PASSWORD'))
+print("DB Name:", os.environ.get('DB_NAME'))
 
 # Set up logging configuration
 setup_logging()
