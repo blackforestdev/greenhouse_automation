@@ -3,3 +3,4 @@
 3.) modify main.py to run in a tmux session for remote admin. 
 4.) update the code for setup_config.py to configre the database 
 5.) Update the code for medules/db.py for better error handling per save_sensor_data method 
+6.) Add/build out phsical computing elelments in config.py for motor control.  
