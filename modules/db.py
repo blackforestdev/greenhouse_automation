@@ -117,18 +117,20 @@ class Database:
             logger.error(f"Error retrieving API token: {err}")
             return None, None
 
-    def save_sensor_data(self, timestamp, temperature, humidity, vpd):
-        """Save sensor data (temperature, humidity, VPD) to the database."""
-        try:
-            query = """
-            INSERT INTO sensor_data (timestamp, temperature, humidity, vpd) 
-            VALUES (%s, %s, %s, %s)
-            """
-            values = (timestamp, temperature, humidity, vpd)
-            self.cursor.execute(query, values)
-            self.connection.commit()
-            logger.info("Sensor data saved successfully.")
-        except mysql.connector.Error as err:
-            logger.error(f"Error saving sensor data: {err}")
+def save_sensor_data(self, timestamp, temperature, humidity, vpd):
+    """Save sensor data (temperature, humidity, VPD) to the database."""
+    try:
+        query = """
+        INSERT INTO sensor_data (timestamp, temperature, humidity, vpd) 
+        VALUES (%s, %s, %s, %s)
+        """
+        values = (timestamp, temperature, humidity, vpd)
+        self.cursor.execute(query, values)
+        self.connection.commit()
+        logger.info("Sensor data saved successfully.")
+    except mysql.connector.Error as err:
+        logger.error(f"Error saving sensor data (Temperature: {temperature}, Humidity: {humidity}, VPD: {vpd}): {err}")
+    except Exception as e:
+        logger.error(f"Unexpected error in save_sensor_data (Temperature: {temperature}, Humidity: {humidity}, VPD: {vpd}): {e}")
 
-# Additional methods here.UbiBot_Get_TEMP_HUMI_Data_Tool.py
+# Additional methods here
