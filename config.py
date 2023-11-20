@@ -1,4 +1,8 @@
 import os
+from dotenv import load_dotenv
+
+# Load the environment variables from the .env file
+load_dotenv()
 
 # Flask app settings
 SECRET_KEY = os.environ.get('FLASK_SECRET_KEY', 'default_secret_key_for_local_development')
