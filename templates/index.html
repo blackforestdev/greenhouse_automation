@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Greenhouse Automation Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/solarized-dark.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 </head>
 
@@ -36,7 +36,7 @@
             <!-- Manual override Motor Control buttons -->
             <button class="btn btn-primary motor-control-btn" data-action="roll_up">Roll Up All Motors</button>
             <button class="btn btn-yellow motor-control-btn" data-action="roll_down">Roll Down All Motors</button>
-            <button class="btn btn-danger motor-control-btn" data-action="stop_motors">Stop All Motors</button>        
+            <button class="btn btn-danger motor-control-btn" data-action="stop">Stop All Motors</button>        
 
             <!-- Manual Motor control switches activate/deactivate hardware -->
             <h4>Motor Control On/Off</h4>
@@ -96,7 +96,7 @@
             fetch('/get_motor_action')
                 .then(response => response.json())
                 .then(data => {
-                    document.getElementById('motor-action').innerText = data.action;
+                    document.getElementById('current-status').innerText = data.action;
                 });
         }
 

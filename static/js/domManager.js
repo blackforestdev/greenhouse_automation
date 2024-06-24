@@ -15,11 +15,8 @@ export function initTimeUpdater() {
 }
 
 function triggerMotor(motorId, action) {
-    // Ensure motorId and action are valid
-    if (!motorId || !action) {
-        console.error(`Invalid motorId (${motorId}) or action (${action})`);
-        return;
-    }
+    // Default motorId to 'all' if not provided
+    motorId = motorId || 'all';
 
     const motorActionUrl = `/motor_action/${action}`;
 
@@ -49,7 +46,7 @@ function motorControlButtonListener() {
         button.addEventListener('click', () => {
             const action = button.dataset.action;
             console.log(`Button clicked: ${action}`);
-            triggerMotor(null, action); // Assuming no specific motor ID for all motors action
+            triggerMotor('all', action); // Use 'all' to indicate all motors action
         });
     });
 }

@@ -123,12 +123,26 @@ def sensor_data():
 def motor_action(action):
     try:
         data = request.get_json()
-        motor_id = data.get('motorId')
+        motor_id = data.get('motor_id', 'all')  # Default to 'all' if no motor_id is provided
         motor_control.perform_action(action, motor_id)
         return jsonify({'status': 'success', 'action': action, 'motorId': motor_id}), 200
     except Exception as e:
         logger.error(f"Error in {action}: {e}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/manual_control', methods=['POST'])
+def manual_control():
+    global current_action
+    # Get the control action from the request
+    action = request.form['action']
+    motor_id = request.form['motor_id']
+    
+    # Call the motor control function with the action
+    result = motor_control.perform_action(action, motor_id)
+    
+    # Update the status
+    current_action = f"Motor {motor_id} {action.replace('_', ' ')}"
+    return jsonify({'status': 'success'})
 
 @socketio.on('request_sensor_data')
 def handle_request_sensor_data():

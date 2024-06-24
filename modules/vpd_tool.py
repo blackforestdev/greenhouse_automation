@@ -35,6 +35,6 @@ def calculate_vpd(temperature_celsius, relative_humidity):
     avp = (relative_humidity / 100) * svp
 
     # Calculate VPD
-    vpd = svp - avp
+    vpd = svp - avp 
 
     return vpd

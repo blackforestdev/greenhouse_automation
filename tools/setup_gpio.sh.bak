@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Array of GPIO pins and their corresponding chips for each motor
+PINS=(
+    "gpiochip1 17"
+    "gpiochip1 27"
+    "gpiochip1 22"
+    "gpiochip1 10"
+    "gpiochip1 9"
+    "gpiochip1 11"
+    "gpiochip1 5"
+    "gpiochip1 6"
+)
+
+for pin in "${PINS[@]}"; do
+    GPIOCHIP=$(echo $pin | cut -d ' ' -f 1)
+    GPIONUM=$(echo $pin | cut -d ' ' -f 2)
+
+    echo "Setting up GPIO pin $GPIONUM on chip $GPIOCHIP"
+
+    # Set the GPIO pin direction to output and initial value to 0
+    gpioset $GPIOCHIP $GPIONUM=0
+    if [ $? -ne 0 ]; then
+        echo "Failed to set GPIO pin $GPIONUM on chip $GPIOCHIP"
+    else
+        echo "Successfully set GPIO pin $GPIONUM on chip $GPIOCHIP"
+    fi
+done

@@ -1,6 +1,4 @@
-# modules/sensors.py
-
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 
 # Custom module imports
@@ -16,20 +14,19 @@ def fetch_sensor_data():
     Fetches the latest sensor data and calculates the VPD.
     """
     try:
+        token, expiry_time = None, None
         with Database() as db:
             token_data = db.get_api_token()
-            if not token_data:
-                logger.error("No token data available from the database.")
+            if token_data:
+                token, expiry_time = token_data.get('token'), token_data.get('expiry_time')
+
+        if not token or datetime.now() >= expiry_time:
+            logger.info("Generating a new token as the current one is invalid or expired.")
+            token, expiry_time = generate_access_token()
+            if not token:
+                logger.error("Failed to generate a new access token.")
                 return None
-
-            token, expiry_time = token_data.get('token'), token_data.get('expiry_time')
-
-            # Generate a new token if the current one is invalid or expired
-            if not token or datetime.now() >= expiry_time:
-                token, expiry_time = generate_access_token()
-                if not token:
-                    logger.error("Failed to generate a new access token.")
-                    return None
+            with Database() as db:
                 db.save_api_token(token, expiry_time)
 
         # Fetch sensor data using the valid token

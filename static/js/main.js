@@ -36,10 +36,23 @@ function updateMotorStatusUI(motorId, status) {
     }
 }
 
-function updateCurrentStatus(status) {
+function updateCurrentStatus(action) {
     var currentStatus = document.getElementById('current-status');
     if (currentStatus) {
-        currentStatus.textContent = status;
+        switch (action) {
+            case 'roll_up':
+                currentStatus.textContent = 'All Motors rolling up';
+                break;
+            case 'roll_down':
+                currentStatus.textContent = 'All Motors rolling down';
+                break;
+            case 'stop':
+                currentStatus.textContent = 'All motors stopped';
+                break;
+            default:
+                currentStatus.textContent = 'Motors idle';
+                break;
+        }
     }
 }
 
