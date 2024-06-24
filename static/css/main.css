@@ -1,1 +1,78 @@
-/* Main CSS */
+/* main.css */
+
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+    color: #343a40;
+}
+
+header {
+    margin-bottom: 20px;
+}
+
+h1 {
+    font-size: 2.5rem;
+    color: #007bff;
+}
+
+h2 {
+    font-size: 2rem;
+    margin-top: 20px;
+}
+
+.jumbotron {
+    background-color: #e9ecef;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+button {
+    margin-right: 10px;
+}
+
+button.btn-yellow {
+    background-color: #ffc107;
+    color: white;
+}
+
+/* Custom switch styles */
+.custom-control-input:checked ~ .custom-control-label::before {
+    background-color: #007bff;
+}
+
+.custom-switch {
+    margin-top: 10px;
+}
+
+/* Motor Status Styles */
+#sidewall-left-status,
+#sidewall-right-status,
+#overhead-left-status,
+#overhead-right-status {
+    margin-top: 5px;
+    font-size: 1rem;
+    color: #495057;
+}
+
+/* New Motor Action Status Styles */
+#motor-action-status {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #28a745;
+    margin-top: 10px;
+}
+
+/* Form Styles */
+form {
+    margin-top: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+}

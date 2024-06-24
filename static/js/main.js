@@ -1,28 +1,47 @@
 // Main JS
 var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
 
-
 function toggleMotor(motorId, status) {
-    socket.emit('change_motor_status', {motorId: motorId, status: status});
+    fetch(`/motor_status/${motorId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: status ? 'Active' : 'Inactive' })
+    })
+    .then(response => {
+        if (response.ok) {
+            console.log(`${status ? 'Activated' : 'Deactivated'} action successful for ${motorId}`);
+            socket.emit('change_motor_status', { motorId: motorId, status: status });
+        } else {
+            console.error(`${status ? 'Activated' : 'Deactivated'} action failed for ${motorId}`);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
 }
 
 socket.on('update_motor_status', function(data) {
     // Update the UI based on the new motor status
     updateMotorStatusUI(data.motorId, data.status);
+    updateCurrentStatus(data.status);
 });
 
 function updateMotorStatusUI(motorId, status) {
     // Logic to change the motor switch UI based on the received status
     var motorSwitch = document.getElementById(motorId);
     if (motorSwitch) {
-        motorSwitch.checked = status;  // Assuming status is a boolean
+        motorSwitch.checked = status === 'Active';  // Assuming status is 'Active' or 'Inactive'
     }
 }
 
-var motorSwitch = document.getElementById('motorSwitchId');  // Replace 'motorSwitchId' with actual ID
-motorSwitch.addEventListener('change', function() {
-    toggleMotor('motorId', this.checked);  // Replace 'motorId' with actual motor ID
-});
+function updateCurrentStatus(status) {
+    var currentStatus = document.getElementById('current-status');
+    if (currentStatus) {
+        currentStatus.textContent = status;
+    }
+}
 
 const motorIds = ['sidewall-left-switch', 'sidewall-right-switch', 'overhead-left-switch', 'overhead-right-switch'];
 motorIds.forEach(motorId => {
@@ -32,4 +51,29 @@ motorIds.forEach(motorId => {
             toggleMotor(motorId, this.checked);
         });
     }
+});
+
+// Handle motor control buttons
+document.querySelectorAll('.motor-control-btn').forEach(button => {
+    button.addEventListener('click', function() {
+        const action = this.getAttribute('data-action');
+        fetch(`/motor_action/${action}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({})
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log(`${action} action successful`);
+                updateCurrentStatus(action);
+            } else {
+                console.error(`${action} action failed`);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
 });

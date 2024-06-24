@@ -16,7 +16,7 @@ from modules.api_utils import generate_access_token, get_sensor_data
 
 # Load the .env file
 load_dotenv()
-# for debuging the credentials 
+# for debugging the credentials 
 print("DB Host:", os.environ.get('DB_HOST'))
 print("DB User:", os.environ.get('DB_USER_NAME'))
 print("DB Password:", os.environ.get('DB_PASSWORD'))
@@ -33,6 +33,8 @@ logger = logging.getLogger('my_application.main')
 
 app.register_error_handler(404, handle_404)
 
+current_action = "Motors idle"
+
 @app.before_request
 def before_request():
     logger.info("Request received at %s", datetime.now())
@@ -42,7 +44,7 @@ def timedelta_to_time_string(timedelta_obj):
     hours = total_seconds // 3600
     minutes = (total_seconds % 3600) // 60
     seconds = total_seconds % 60
-    return f"{hours:02d}:{minutes:02d}:{seconds:02d}"    
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
 
 @app.route('/')
 def index():
@@ -61,7 +63,7 @@ def set_time():
 
     try:
         with Database() as db:
-            db.update_time_settings(roll_up_time, roll_down_time)  # Method name changed to reflect the new functionality
+            db.update_time_settings(roll_up_time, roll_down_time)
         socketio.emit('update_time_settings', {'roll_up_time': roll_up_time, 'roll_down_time': roll_down_time})
         return jsonify({'status': 'success'}), 200
     except Exception as e:
@@ -80,26 +82,34 @@ def get_motor_statuses():
 
 @app.route('/motor_status/<string:motor_switch_id>', methods=['POST'])
 def update_motor_status(motor_switch_id):
+    global current_action
     try:
         data = request.get_json()
         status = data['status']
 
         with Database() as db:
-            # Use the existing update_motor_status method
             db.update_motor_status(motor_switch_id, status)
 
-        # Broadcast the updated status to all connected clients
-        socketio.emit('motor_status_updated', {'motor_switch_id': motor_switch_id, 'status': status})
+        if status == "Active":
+            current_action = f"All Motors rolling {motor_switch_id.split('-')[-1]}"  # Adjust this logic based on your motor ID naming
+        elif status == "Deactivated":
+            current_action = "All Motors stopped"
+        else:
+            current_action = "Motors idle"
 
+        socketio.emit('motor_status_updated', {'motor_switch_id': motor_switch_id, 'status': status})
         return jsonify({'status': 'success'}), 200
     except Exception as e:
         logger.error(f"Failed to update motor status for {motor_switch_id}: {e}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
+@app.route('/get_motor_action')
+def get_motor_action():
+    return jsonify(action=current_action)
+
 @app.route('/get_sensor_data')
 def sensor_data():
     try:
-        # Fetch sensor data (including VPD calculation) from sensors.py
         sensor_data = fetch_sensor_data()
         if sensor_data:
             return jsonify(sensor_data), 200
@@ -109,12 +119,22 @@ def sensor_data():
         app.logger.error("Failed to fetch sensor data: %s", e)
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
+@app.route('/motor_action/<string:action>', methods=['POST'])
+def motor_action(action):
+    try:
+        data = request.get_json()
+        motor_id = data.get('motorId')
+        motor_control.perform_action(action, motor_id)
+        return jsonify({'status': 'success', 'action': action, 'motorId': motor_id}), 200
+    except Exception as e:
+        logger.error(f"Error in {action}: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
 @socketio.on('request_sensor_data')
 def handle_request_sensor_data():
     try:
-        # Fetch sensor data (including VPD calculation) from sensors.py
         sensor_data = fetch_sensor_data()
-        if sensor_data:
+        if (sensor_data):
             socketio.emit('sensor_data_response', sensor_data)
         else:
             socketio.emit('sensor_data_error', {'status': 'error', 'message': 'No sensor data available'})
@@ -127,7 +147,7 @@ def handle_request_current_times():
     try:
         with Database() as db:
             time_settings = db.get_latest_time_settings()
-            if time_settings:
+            if (time_settings):
                 roll_up_time = timedelta_to_time_string(time_settings['roll_up_time'])
                 roll_down_time = timedelta_to_time_string(time_settings['roll_down_time'])
 
@@ -139,27 +159,32 @@ def handle_request_current_times():
 
 @socketio.on('trigger_motor_action')
 def handle_motor_action(data):
+    global current_action
     action = data.get('action')
-    motor_id = data.get('motor_id')  # Assuming the data contains motor_id
+    motor_id = data.get('motor_id')
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     try:
-        motor_control.perform_action(action, motor_id)  # Perform the motor action
+        motor_control.perform_action(action, motor_id)
         logger.info(f"Motor action '{action}' triggered for motor_id={motor_id} at {timestamp}")
-        
-        # Update the motor status in the database
+
         with Database() as db:
             new_status = 'Active' if action == 'turn_on' else 'Inactive'
             db.update_motor_status(motor_id, new_status)
         
-        # Broadcast the updated status to all connected clients
+        if action == 'turn_on':
+            current_action = f"All Motors rolling {motor_id.split('-')[-1]}"  # Adjust this logic based on your motor ID naming
+        elif action == 'turn_off':
+            current_action = "All Motors stopped"
+        else:
+            current_action = "Motors idle"
+
         socketio.emit('motor_action_response', {
             'status': 'success', 
             'action': action, 
             'motor_id': motor_id, 
             'timestamp': timestamp
         })
-
     except Exception as e:
         logger.error(f"Error triggering motor action '{action}' for motor_id={motor_id} at {timestamp}: {e}")
         socketio.emit('motor_action_error', {
@@ -169,6 +194,6 @@ def handle_motor_action(data):
             'message': str(e), 
             'timestamp': timestamp
         })
-           
+
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=5000)
+    socketio.run(app, host='0.0.0.0', port=5000, debug=True)

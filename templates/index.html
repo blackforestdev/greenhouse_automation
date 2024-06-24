@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Greenhouse Automation Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="/static/css/solarized-dark.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/solarized-dark.css') }}">
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 </head>
 
@@ -27,6 +27,7 @@
             <p><strong>Temperature:</strong> <span id="temperature">Loading...</span></p>
             <p><strong>Humidity:</strong> <span id="humidity">Loading...</span></p>
             <p><strong>VPD:</strong> <span id="vpd">Loading...</span></p>
+            <p><strong>Current Status:</strong> <span id="current-status">Motors idle</span></p>            
         </section>
 
         <!-- Manual Controls -->
@@ -89,13 +90,15 @@
     <script src="{{ url_for('static', filename='js/motorStatusHandler.js') }}"></script>
 
     <script type="module">
-        import {
-            initTimeUpdater,
-            initMotorSwitches,
-            fetchMotorStatuses,
-            handleSetTimeForm,
-            fetchSensorData
-        } from '/static/js/domManager.js';
+        import { initTimeUpdater, initMotorSwitches, fetchMotorStatuses, handleSetTimeForm, fetchSensorData } from '/static/js/domManager.js';
+
+        function updateMotorAction() {
+            fetch('/get_motor_action')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('motor-action').innerText = data.action;
+                });
+        }
 
         window.onload = function() {
             initTimeUpdater();
@@ -103,6 +106,7 @@
             handleSetTimeForm();
             fetchSensorData();
             setInterval(fetchMotorStatuses, 5000); // Fetch motor statuses every 5 seconds
+            setInterval(updateMotorAction, 2000);  // Fetch motor action every 2 seconds
         };
     </script>
 

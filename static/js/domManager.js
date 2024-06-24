@@ -2,7 +2,6 @@
 
 import { getCurrentTime, formatTime12Hour } from './timeManager.js';
 
-
 const socket = io();
 
 export function updateCurrentTimeElement() {
@@ -15,44 +14,42 @@ export function initTimeUpdater() {
     setInterval(updateCurrentTimeElement, 1000);
 }
 
-export function triggerMotor(action) {
-    // Create an object to store the status of each motor switch
-    let motorStatuses = {
-        'motor_1': document.getElementById('sidewall-left-switch').checked,
-        'motor_2': document.getElementById('sidewall-right-switch').checked,
-        'motor_3': document.getElementById('overhead-left-switch').checked,
-        'motor_4': document.getElementById('overhead-right-switch').checked
-    };
+function triggerMotor(motorId, action) {
+    // Ensure motorId and action are valid
+    if (!motorId || !action) {
+        console.error(`Invalid motorId (${motorId}) or action (${action})`);
+        return;
+    }
 
-    fetch(`/motor_action/${action}`, {
+    const motorActionUrl = `/motor_action/${action}`;
+
+    fetch(motorActionUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ motor_statuses: motorStatuses })
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ motor_id: motorId }),
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
-        // Alert with the action performed
-        alert(`${action.replace('_', ' ')}: ${data.message}`);
+        if (data.status === 'success') {
+            console.log(`Motor ${motorId} ${action} successfully.`);
+            updateCurrentStatus(action);
+        } else {
+            console.error(`Failed to ${action} motor ${motorId}: ${data.message}`);
+        }
     })
     .catch(error => {
-        console.error('Fetch operation error:', error.message);
-        alert('An error occurred.');
+        console.error(`Error triggering motor ${motorId} ${action}:`, error);
     });
 }
-
 
 function motorControlButtonListener() {
     document.querySelectorAll('.motor-control-btn').forEach(button => {
         button.addEventListener('click', () => {
             const action = button.dataset.action;
-            console.log("Button clicked:", action); //Added for testing
-            // Trigger the action for all motors regardless of individual motor IDs
-            triggerMotor(action);
+            console.log(`Button clicked: ${action}`);
+            triggerMotor(null, action); // Assuming no specific motor ID for all motors action
         });
     });
 }
@@ -62,13 +59,13 @@ export function requestTimes() {
 }
 
 socket.on('current_times', data => {
-    console.log("Received time data:", data);  // Log received data
+    console.log("Received time data:", data);
 
     const formattedRollUpTime = data.roll_up ? formatTime12Hour(data.roll_up) : "Not set";
     const formattedRollDownTime = data.roll_down ? formatTime12Hour(data.roll_down) : "Not set";
 
-    console.log("Formatted Roll Up Time:", formattedRollUpTime);  // Log formatted time
-    console.log("Formatted Roll Down Time:", formattedRollDownTime);  // Log formatted time
+    console.log("Formatted Roll Up Time:", formattedRollUpTime);
+    console.log("Formatted Roll Down Time:", formattedRollDownTime);
 
     document.getElementById('roll-up-time').textContent = formattedRollUpTime;
     document.getElementById('roll-down-time').textContent = formattedRollDownTime;
@@ -96,7 +93,6 @@ export function initMotorSwitches() {
         console.log(`Found switch element for ID: ${motor.id}`);
         const status = switchElem.checked ? 'Active' : 'Deactivated';
 
-        // Ensure the corresponding status element exists before trying to update its textContent
         const statusElem = document.getElementById(motor.statusElem);
         if (statusElem) {
             statusElem.textContent = status;
@@ -184,13 +180,11 @@ export function fetchSensorData() {
         return response.json();
     })
     .then(data => {
-        console.log("Received sensor data:", data); // added for debugging
-        // Update the UI with the received data
+        console.log("Received sensor data:", data);
         updateSensorDataUI(data);
     })
     .catch(error => {
         console.error('Error fetching sensor data:', error);
-        // Handle error (possibly update UI to reflect the error)
     });
 }
 
@@ -198,7 +192,24 @@ function updateSensorDataUI(data) {
     document.getElementById('temperature').textContent = data.temperature ? `${data.temperature.toFixed(2)}°C` : "Not available";
     document.getElementById('humidity').textContent = data.humidity ? `${data.humidity.toFixed(2)}%` : "Not available";
     document.getElementById('vpd').textContent = data.vpd ? `${data.vpd.toFixed(2)} kPa` : "Not available";
-    // Add any other UI updates needed for sensor data
+}
+
+function updateCurrentStatus(action) {
+    const currentStatusElem = document.getElementById('current-status');
+    switch (action) {
+        case 'roll_up':
+            currentStatusElem.textContent = 'All Motors rolling up';
+            break;
+        case 'roll_down':
+            currentStatusElem.textContent = 'All Motors rolling down';
+            break;
+        case 'stop_motors':
+            currentStatusElem.textContent = 'All motors stopped';
+            break;
+        default:
+            currentStatusElem.textContent = 'Motors idle';
+            break;
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -209,4 +220,13 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchMotorStatuses();
     handleSetTimeForm();
     fetchSensorData();
+
+    // Listen for socket events to update current status
+    socket.on('motor_status_updated', data => {
+        updateCurrentStatus(data.status);
+    });
+
+    socket.on('motor_action_response', data => {
+        updateCurrentStatus(data.action);
+    });
 });
