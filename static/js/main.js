@@ -1,4 +1,7 @@
-// Main JS
+// static/js/main.js
+
+import { MOTOR_IDS, MOTOR_STATUS_IDS } from './config.js';
+
 var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
 
 function toggleMotor(motorId, status) {
@@ -7,14 +10,15 @@ function toggleMotor(motorId, status) {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ status: status ? 'Active' : 'Inactive' })
+        body: JSON.stringify({ status: status ? 'Active' : 'Deactivated' })
     })
-    .then(response => {
-        if (response.ok) {
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
             console.log(`${status ? 'Activated' : 'Deactivated'} action successful for ${motorId}`);
             socket.emit('change_motor_status', { motorId: motorId, status: status });
         } else {
-            console.error(`${status ? 'Activated' : 'Deactivated'} action failed for ${motorId}`);
+            console.error(`${status ? 'Activated' : 'Deactivated'} action failed for ${motorId}: ${data.message}`);
         }
     })
     .catch(error => {
@@ -22,17 +26,19 @@ function toggleMotor(motorId, status) {
     });
 }
 
-socket.on('update_motor_status', function(data) {
+socket.on('motor_status_updated', function(data) {
     // Update the UI based on the new motor status
-    updateMotorStatusUI(data.motorId, data.status);
+    updateMotorStatusUI(data.motor_switch_id, data.status);
     updateCurrentStatus(data.status);
 });
 
 function updateMotorStatusUI(motorId, status) {
     // Logic to change the motor switch UI based on the received status
-    var motorSwitch = document.getElementById(motorId);
-    if (motorSwitch) {
-        motorSwitch.checked = status === 'Active';  // Assuming status is 'Active' or 'Inactive'
+    var motorSwitch = document.getElementById(MOTOR_IDS[motorId] + '-switch');
+    var statusElem = document.getElementById(MOTOR_STATUS_IDS[motorId]);
+    if (motorSwitch && statusElem) {
+        motorSwitch.checked = status === 'Active';
+        statusElem.textContent = status;
     }
 }
 
@@ -56,9 +62,8 @@ function updateCurrentStatus(action) {
     }
 }
 
-const motorIds = ['sidewall-left-switch', 'sidewall-right-switch', 'overhead-left-switch', 'overhead-right-switch'];
-motorIds.forEach(motorId => {
-    const motorSwitch = document.getElementById(motorId);
+Object.keys(MOTOR_IDS).forEach(motorId => {
+    const motorSwitch = document.getElementById(MOTOR_IDS[motorId] + '-switch');
     if (motorSwitch) {
         motorSwitch.addEventListener('change', function() {
             toggleMotor(motorId, this.checked);
@@ -70,19 +75,22 @@ motorIds.forEach(motorId => {
 document.querySelectorAll('.motor-control-btn').forEach(button => {
     button.addEventListener('click', function() {
         const action = this.getAttribute('data-action');
+        const motorId = this.getAttribute('data-motor-id') || 'all';
+
         fetch(`/motor_action/${action}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({})
+            body: JSON.stringify({ motor_id: motorId })
         })
-        .then(response => {
-            if (response.ok) {
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
                 console.log(`${action} action successful`);
                 updateCurrentStatus(action);
             } else {
-                console.error(`${action} action failed`);
+                console.error(`${action} action failed: ${data.message}`);
             }
         })
         .catch(error => {

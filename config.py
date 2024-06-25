@@ -17,16 +17,19 @@ DB_CONFIG = {
 
 # Motor settings
 MOTOR_PIN_CONFIG = {
-    'motor_1': {
-        'forward_pin': 21,
-        'backward_pin': 20
-    },
-    'motor_2': {
-        'forward_pin': 23,
-        'backward_pin': 22
-    }
+    'sidewall-left': {'up': 79, 'down': 80},
+    'sidewall-right': {'up': 81, 'down': 82},
+    'overhead-left': {'up': 83, 'down': 84},
+    'overhead-right': {'up': 85, 'down': 86}
 }
 MOTOR_RUN_TIME = int(os.environ.get('MOTOR_RUN_TIME', 10))  # time in seconds
+
+MOTOR_IDS = {
+    'sidewall-left': 'sidewall-left-switch',
+    'sidewall-right': 'sidewall-right-switch',
+    'overhead-left': 'overhead-left-switch',
+    'overhead-right': 'overhead-right-switch'
+}
 
 # Sensor settings
 SENSOR_PIN_CONFIG = {

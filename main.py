@@ -3,7 +3,6 @@ from flask_socketio import SocketIO
 from datetime import datetime, timedelta
 import logging
 import os
-import traceback
 from dotenv import load_dotenv
 
 # Import custom modules
@@ -14,19 +13,17 @@ from app_logging.logging_module import setup_logging
 from app_logging.error_handlers import handle_404
 from modules.api_utils import generate_access_token, get_sensor_data
 
+# Load the configuration
+from config import MOTOR_IDS
+
 # Load the .env file
 load_dotenv()
-# for debugging the credentials 
-print("DB Host:", os.environ.get('DB_HOST'))
-print("DB User:", os.environ.get('DB_USER_NAME'))
-print("DB Password:", os.environ.get('DB_PASSWORD'))
-print("DB Name:", os.environ.get('DB_NAME'))
 
 # Set up logging configuration
 setup_logging()
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your_secret_key'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 socketio = SocketIO(app)
 
 logger = logging.getLogger('my_application.main')
@@ -85,13 +82,18 @@ def update_motor_status(motor_switch_id):
     global current_action
     try:
         data = request.get_json()
+        logger.info(f"Received data for motor {motor_switch_id}: {data}")
+
+        if 'status' not in data:
+            raise ValueError("Missing 'status' field in request")
+
         status = data['status']
 
         with Database() as db:
             db.update_motor_status(motor_switch_id, status)
 
         if status == "Active":
-            current_action = f"All Motors rolling {motor_switch_id.split('-')[-1]}"  # Adjust this logic based on your motor ID naming
+            current_action = f"Motor {motor_switch_id.split('-')[1]} rolling"  
         elif status == "Deactivated":
             current_action = "All Motors stopped"
         else:
@@ -101,7 +103,7 @@ def update_motor_status(motor_switch_id):
         return jsonify({'status': 'success'}), 200
     except Exception as e:
         logger.error(f"Failed to update motor status for {motor_switch_id}: {e}")
-        return jsonify({'status': 'error', 'message': str(e)}), 500
+        return jsonify({'status': 'error', 'message': str(e)}), 400
 
 @app.route('/get_motor_action')
 def get_motor_action():
@@ -187,7 +189,7 @@ def handle_motor_action(data):
             db.update_motor_status(motor_id, new_status)
         
         if action == 'turn_on':
-            current_action = f"All Motors rolling {motor_id.split('-')[-1]}"  # Adjust this logic based on your motor ID naming
+            current_action = f"Motor {motor_id.split('-')[1]} rolling"
         elif action == 'turn_off':
             current_action = "All Motors stopped"
         else:

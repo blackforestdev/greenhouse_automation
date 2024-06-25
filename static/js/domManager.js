@@ -1,6 +1,7 @@
 // static/js/domManager.js
 
 import { getCurrentTime, formatTime12Hour } from './timeManager.js';
+import { MOTOR_IDS, MOTOR_STATUS_IDS } from './config.js';
 
 const socket = io();
 
@@ -15,9 +16,7 @@ export function initTimeUpdater() {
 }
 
 function triggerMotor(motorId, action) {
-    // Default motorId to 'all' if not provided
     motorId = motorId || 'all';
-
     const motorActionUrl = `/motor_action/${action}`;
 
     fetch(motorActionUrl, {
@@ -45,8 +44,9 @@ function motorControlButtonListener() {
     document.querySelectorAll('.motor-control-btn').forEach(button => {
         button.addEventListener('click', () => {
             const action = button.dataset.action;
+            const motorId = button.dataset.motorId || 'all';
             console.log(`Button clicked: ${action}`);
-            triggerMotor('all', action); // Use 'all' to indicate all motors action
+            triggerMotor(motorId, action);
         });
     });
 }
@@ -71,41 +71,48 @@ socket.on('current_times', data => {
 export function initMotorSwitches() {
     console.log("Initializing motor switches...");
 
-    const motorSwitches = [
-        { id: 'sidewall-left-switch', statusElem: 'sidewall-left-status' },
-        { id: 'sidewall-right-switch', statusElem: 'sidewall-right-status' },
-        { id: 'overhead-left-switch', statusElem: 'overhead-left-status' },
-        { id: 'overhead-right-switch', statusElem: 'overhead-right-status' },
-    ];
-
-    motorSwitches.forEach(motor => {
+    Object.keys(MOTOR_IDS).forEach(key => {
+        const motor = { id: MOTOR_IDS[key], statusElem: MOTOR_STATUS_IDS[key] };
         console.log(`Checking motor switch with ID: ${motor.id}`);
         
         const switchElem = document.getElementById(motor.id);
         if (!switchElem) {
             console.error(`Switch element not found for ID: ${motor.id}`);
-            return; // Skip this iteration if the element is not found
+            return; 
         }
         
         console.log(`Found switch element for ID: ${motor.id}`);
-        const status = switchElem.checked ? 'Active' : 'Deactivated';
+        switchElem.addEventListener('change', (event) => {
+            const status = event.target.checked ? 'Active' : 'Deactivated';
+            updateMotorStatus(motor.id, status);
 
-        const statusElem = document.getElementById(motor.statusElem);
-        if (statusElem) {
-            statusElem.textContent = status;
-        } else {
-            console.error(`Status element not found for ID: ${motor.statusElem}`);
-        }
-
-        updateMotorStatus(motor.id, status);
+            const statusElem = document.getElementById(motor.statusElem);
+            if (statusElem) {
+                statusElem.textContent = status;
+            } else {
+                console.error(`Status element not found for ID: ${motor.statusElem}`);
+            }
+        });
     });
 }
 
 function updateMotorStatus(motorId, status) {
+    const data = { status };
+    console.log(`Sending request to update motor status: ${JSON.stringify(data)}`);
+
     fetch(`/motor_status/${motorId}`, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ status })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log(`Motor status updated: ${JSON.stringify(data)}`);
     })
     .catch(error => console.error('Error updating motor status:', error));
 }
@@ -119,10 +126,9 @@ export function fetchMotorStatuses() {
 
 function updateMotorSwitchesUI(motorStatuses) {
     motorStatuses.forEach(motor => {
-        let motorName = getMotorName(motor.motor_id);
-        let switchElemId = `${motorName}-switch`;
-        let switchElem = document.getElementById(switchElemId);
-        let statusElem = document.getElementById(`${motorName}-status`);
+        const switchElemId = MOTOR_IDS[motor.motor_id];
+        const switchElem = document.getElementById(switchElemId);
+        const statusElem = document.getElementById(`${switchElemId}-status`);
         if (switchElem && statusElem) {
             switchElem.checked = motor.status === 'Active';
             statusElem.textContent = motor.status;
@@ -130,22 +136,12 @@ function updateMotorSwitchesUI(motorStatuses) {
     });
 }
 
-function getMotorName(motorId) {
-    switch (motorId) {
-        case 1: return 'sidewall-left';
-        case 2: return 'sidewall-right';
-        case 3: return 'overhead-left';
-        case 4: return 'overhead-right';
-        default: return 'unknown';
-    }
-}
-
 export function handleSetTimeForm() {
     const setTimeForm = document.getElementById('set-time-form');
     setTimeForm.addEventListener('submit', event => {
         event.preventDefault();
-        let rollUpTime = document.getElementById('roll_up_time').value;
-        let rollDownTime = document.getElementById('roll_down_time').value;
+        const rollUpTime = document.getElementById('roll_up_time').value;
+        const rollDownTime = document.getElementById('roll_down_time').value;
         submitTimeSettings(rollUpTime, rollDownTime);
     });
 }
@@ -158,7 +154,7 @@ function submitTimeSettings(rollUpTime, rollDownTime) {
     })
     .then(response => response.json())
     .then(data => {
-        if(data.status === 'success') {
+        if (data.status === 'success') {
             alert('Times set successfully!');
             requestTimes();
         } else {
@@ -200,7 +196,7 @@ function updateCurrentStatus(action) {
         case 'roll_down':
             currentStatusElem.textContent = 'All Motors rolling down';
             break;
-        case 'stop_motors':
+        case 'stop':
             currentStatusElem.textContent = 'All motors stopped';
             break;
         default:
@@ -212,18 +208,27 @@ function updateCurrentStatus(action) {
 document.addEventListener('DOMContentLoaded', () => {
     initTimeUpdater();
     requestTimes();
-    initMotorSwitches();
+    setTimeout(initMotorSwitches, 1000);  // Adding a delay to ensure the DOM is fully loaded
     motorControlButtonListener();
     fetchMotorStatuses();
     handleSetTimeForm();
     fetchSensorData();
 
-    // Listen for socket events to update current status
     socket.on('motor_status_updated', data => {
+        updateMotorSwitchesUI([data]);
         updateCurrentStatus(data.status);
     });
 
     socket.on('motor_action_response', data => {
         updateCurrentStatus(data.action);
+    });
+
+    socket.on('sensor_data_response', data => {
+        updateSensorDataUI(data);
+    });
+
+    socket.on('current_times', data => {
+        document.querySelector('#roll-up-time').textContent = formatTime12Hour(data.roll_up);
+        document.querySelector('#roll-down-time').textContent = formatTime12Hour(data.roll_down);
     });
 });
